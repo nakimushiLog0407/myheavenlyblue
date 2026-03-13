@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>翻訳の本棚</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Noto+Sans+KR:wght@300;400&family=IM+Fell+English:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1410;
+    --shelf: #2d1f14;
+    --shelf-edge: #4a3020;
+    --shelf-shadow: #0d0a07;
+    --paper: #f5efe6;
+    --paper-dark: #e8ddd0;
+    --ink: #2c1f14;
+    --ink-light: #6b5040;
+    --accent: #c8956c;
+    --accent-warm: #e8b48a;
+    --progress-0: #3a2a1e;
+    --progress-low: #7a5c3a;
+    --progress-mid: #c8956c;
+    --progress-high: #e8c49a;
+    --progress-done: #f5e6cc;
+    --green: #7a9e7e;
+    --gold: #d4a853;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Noto Serif JP', serif;
+    color: var(--paper);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    padding: 32px 40px 20px;
+    border-bottom: 1px solid #3a2a1e;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    background: linear-gradient(to bottom, #0d0a07, var(--bg));
+  }
+  .header h1 {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.8rem;
+    color: var(--accent-warm);
+    letter-spacing: 0.02em;
+  }
+  .header .subtitle {
+    font-size: 0.75rem;
+    color: var(--ink-light);
+    letter-spacing: 0.1em;
+  }
+  .header-stats {
+    margin-left: auto;
+    text-align: right;
+    font-size: 0.7rem;
+    color: var(--ink-light);
+    line-height: 1.8;
+  }
+  .header-stats span {
+    color: var(--accent-warm);
+    font-size: 1rem;
+  }
+
+  /* ===== OVERALL PROGRESS BAR ===== */
+  .overall-progress {
+    padding: 16px 40px;
+    background: #110e0b;
+    border-bottom: 1px solid #2a1e14;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .overall-label {
+    font-size: 0.65rem;
+    color: var(--ink-light);
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+  .overall-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: #2a1e14;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .overall-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--accent), var(--accent-warm));
+    border-radius: 2px;
+    transition: width 0.8s ease;
+  }
+  .overall-pct {
+    font-size: 0.7rem;
+    color: var(--accent-warm);
+    white-space: nowrap;
+  }
+
+  /* ===== CONTROLS ===== */
+  .controls {
+    padding: 14px 40px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid #2a1e14;
+  }
+  .btn {
+    padding: 6px 16px;
+    border: 1px solid var(--shelf-edge);
+    background: transparent;
+    color: var(--ink-light);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--shelf-edge); color: var(--paper); }
+  .btn.primary {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn.primary:hover { background: var(--accent); color: var(--bg); }
+  .controls-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: #1e1408;
+    border: 1px solid var(--gold);
+    border-radius: 2px;
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+  }
+
+  /* ===== BOOKSHELF ===== */
+  .shelves-container {
+    padding: 30px 40px 60px;
+  }
+  .shelf-row {
+    margin-bottom: 0;
+    position: relative;
+  }
+  .books-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 20px 20px 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0));
+    min-height: 120px;
+    flex-wrap: nowrap;
+    overflow-x: visible;
+  }
+  .shelf-plank {
+    height: 18px;
+    background: linear-gradient(to bottom, var(--shelf-edge), var(--shelf), var(--shelf-shadow));
+    border-radius: 1px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    position: relative;
+  }
+  .shelf-plank::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, #5a3a22, #7a5030, #5a3a22);
+  }
+  .shelf-number {
+    position: absolute;
+    right: 10px;
+    bottom: 3px;
+    font-size: 0.55rem;
+    color: var(--shelf-edge);
+    letter-spacing: 0.1em;
+  }
+
+  /* ===== BOOK ===== */
+  .book {
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease;
+    transform-origin: bottom center;
+    flex-shrink: 0;
+  }
+  .book:hover { transform: translateY(-8px); }
+  .book:hover .book-spine { filter: brightness(1.15); }
+
+  .book-spine {
+    border-radius: 2px 1px 1px 2px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.5), inset -2px 0 4px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+  }
+  .book-spine::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: rgba(255,255,255,0.08);
+  }
+  .book-spine::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(0,0,0,0.3);
+  }
+
+  .book-fill {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    transition: height 0.6s ease;
+  }
+
+  .book-title {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 2px;
+    z-index: 2;
+  }
+  .book-title-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 0.5rem;
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    color: rgba(255,255,255,0.7);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    overflow: hidden;
+    max-height: 80%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .book-chapter-num {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.4rem;
+    color: rgba(255,255,255,0.5);
+    z-index: 2;
+    white-space: nowrap;
+  }
+
+  /* ===== TOOLTIP ===== */
+  .book-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1008;
+    border: 1px solid var(--shelf-edge);
+    padding: 8px 10px;
+    border-radius: 3px;
+    font-size: 0.6rem;
+    color: var(--paper);
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.8);
+    pointer-events: none;
+  }
+  .book-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--shelf-edge);
+  }
+  .book:hover .book-tooltip { display: block; }
+  .tooltip-title { font-weight: 600; color: var(--accent-warm); margin-bottom: 3px; }
+  .tooltip-pct { color: var(--accent); }
+
+  /* ===== MODAL: CHAPTER DETAIL ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,7,5,0.92);
+    z-index: 200;
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--paper);
+    color: var(--ink);
+    width: 92vw;
+    max-width: 900px;
+    max-height: 90vh;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+    overflow: hidden;
+  }
+
+  .modal-header {
+    padding: 20px 24px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .modal-chapter-badge {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    background: rgba(200,149,108,0.15);
+    padding: 3px 8px;
+    border: 1px solid rgba(200,149,108,0.3);
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .modal-title-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    color: var(--paper);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 2px 4px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .modal-title-input:focus { border-bottom-color: var(--accent); }
+  .modal-title-input::placeholder { color: rgba(255,255,255,0.3); }
+
+  .modal-meta {
+    padding: 12px 24px;
+    background: var(--paper-dark);
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-shrink: 0;
+    border-bottom: 1px solid #d0c5b8;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .meta-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    color: var(--ink-light);
+  }
+  .meta-value {
+    font-size: 0.85rem;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .meta-input {
+    background: white;
+    border: 1px solid #c0b0a0;
+    border-radius: 2px;
+    padding: 3px 8px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.8rem;
+    color: var(--ink);
+    width: 100px;
+    outline: none;
+  }
+  .meta-input:focus { border-color: var(--accent); }
+
+  /* Progress in modal */
+  .modal-progress-bar {
+    flex: 1;
+    min-width: 200px;
+  }
+  .modal-progress-track {
+    height: 8px;
+    background: #d0c5b8;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .modal-progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--accent), var(--accent-warm));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .modal-pct-text {
+    font-size: 0.7rem;
+    color: var(--accent);
+    margin-left: auto;
+    padding-top: 8px;
+    white-space: nowrap;
+  }
+
+  /* Editor area */
+  .modal-editors {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .editor-pane {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid #d0c5b8;
+  }
+  .editor-pane:last-child { border-right: none; }
+  .editor-label {
+    padding: 8px 16px;
+    background: var(--paper-dark);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    color: var(--ink-light);
+    border-bottom: 1px solid #d0c5b8;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .char-count {
+    font-size: 0.6rem;
+    color: var(--accent);
+  }
+  .editor-textarea {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.8rem;
+    line-height: 1.9;
+    color: var(--ink);
+    background: var(--paper);
+    overflow-y: auto;
+  }
+  .editor-textarea.korean {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 300;
+    color: #4a3a2a;
+  }
+
+  .modal-footer {
+    padding: 12px 24px;
+    background: var(--paper-dark);
+    border-top: 1px solid #d0c5b8;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .btn-modal {
+    padding: 7px 18px;
+    border-radius: 2px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid;
+  }
+  .btn-save {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .btn-save:hover { background: #4a3020; }
+  .btn-close {
+    background: transparent;
+    color: var(--ink-light);
+    border-color: #c0b0a0;
+  }
+  .btn-close:hover { background: #d0c5b8; }
+  .save-note {
+    font-size: 0.6rem;
+    color: #9a8070;
+    margin-left: auto;
+    font-style: italic;
+  }
+
+  /* ===== ADD CHAPTER MODAL ===== */
+  .add-modal {
+    background: var(--paper);
+    color: var(--ink);
+    width: 380px;
+    border-radius: 3px;
+    padding: 28px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+  }
+  .add-modal h3 {
+    font-size: 0.9rem;
+    color: var(--ink);
+    margin-bottom: 20px;
+    letter-spacing: 0.06em;
+  }
+  .form-group {
+    margin-bottom: 14px;
+  }
+  .form-label {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-light);
+    margin-bottom: 5px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #c0b0a0;
+    border-radius: 2px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.8rem;
+    color: var(--ink);
+    outline: none;
+    background: white;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-shelf {
+    padding: 60px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 0.8rem;
+    line-height: 2;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #1a1008; }
+  ::-webkit-scrollbar-thumb { background: #3a2a1a; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--shelf-edge); }
+
+  /* ===== BADGES PANEL ===== */
+  .badges-panel {
+    padding: 20px 40px;
+    border-top: 1px solid #2a1e14;
+    background: #110e0b;
+  }
+  .badges-title {
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    color: var(--ink-light);
+    margin-bottom: 12px;
+  }
+  .badges-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge.locked {
+    border: 1px solid #2a1e14;
+    color: #3a2a1e;
+  }
+  .badge.unlocked {
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: rgba(212,168,83,0.08);
+  }
+  .badge-icon { font-size: 0.8rem; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>翻訳の本棚</h1>
+    <div class="subtitle">MY TRANSLATION LIBRARY</div>
+  </div>
+  <div class="header-stats">
+    <div>総翻訳文字数 <span id="totalTranslated">0</span> 字</div>
+    <div>文庫本換算 <span id="bunkoCount">0</span> 冊分</div>
+  </div>
+</div>
+
+<!-- OVERALL PROGRESS -->
+<div class="overall-progress">
+  <div class="overall-label">TOTAL PROGRESS</div>
+  <div class="overall-bar-wrap">
+    <div class="overall-bar-fill" id="overallBar" style="width:0%"></div>
+  </div>
+  <div class="overall-pct" id="overallPct">0%</div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <button class="btn primary" onclick="openAddModal()">＋ 章を追加</button>
+  <button class="btn" onclick="openBulkAddModal()">まとめて追加</button>
+  <div class="controls-right">
+    <div class="streak-badge">
+      🔥 <span id="streakDays">0</span> 日連続
+    </div>
+  </div>
+</div>
+
+<!-- SHELVES -->
+<div class="shelves-container" id="shelvesContainer">
+  <div class="empty-shelf" id="emptyState">
+    本棚が空です。「＋ 章を追加」から始めましょう。
+  </div>
+</div>
+
+<!-- BADGES -->
+<div class="badges-panel">
+  <div class="badges-title">MILESTONES</div>
+  <div class="badges-row" id="badgesRow"></div>
+</div>
+
+<!-- ===== CHAPTER DETAIL MODAL ===== -->
+<div class="modal-overlay" id="chapterModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-chapter-badge" id="modalChapterBadge">第1章</div>
+      <input class="modal-title-input" id="modalTitleInput" placeholder="章タイトルを入力…" />
+    </div>
+    <div class="modal-meta">
+      <div class="meta-item">
+        <div class="meta-label">目標文字数</div>
+        <input class="meta-input" id="modalTargetChars" type="number" placeholder="5000" min="1" />
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">翻訳済み文字数</div>
+        <div class="meta-value" id="modalTranslatedCount">0 字</div>
+      </div>
+      <div class="modal-progress-bar">
+        <div class="meta-label">進捗</div>
+        <div class="modal-progress-track">
+          <div class="modal-progress-fill" id="modalProgressFill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="modal-pct-text" id="modalPctText">0%</div>
+    </div>
+    <div class="modal-editors">
+      <div class="editor-pane">
+        <div class="editor-label">
+          原文（韓国語）
+          <span class="char-count" id="originalCount">0 字</span>
+        </div>
+        <textarea class="editor-textarea korean" id="originalText" placeholder="原文を貼り付けてください…"></textarea>
+      </div>
+      <div class="editor-pane">
+        <div class="editor-label">
+          翻訳文（日本語）
+          <span class="char-count" id="translatedCount">0 字</span>
+        </div>
+        <textarea class="editor-textarea" id="translatedText" placeholder="翻訳文を入力してください…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-save" onclick="saveChapter()">保存</button>
+      <button class="btn-modal btn-close" onclick="closeChapterModal()">閉じる</button>
+      <div class="save-note">翻訳済み文字数は日本語翻訳文の文字数から自動計算されます</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD CHAPTER MODAL ===== -->
+<div class="modal-overlay" id="addModal">
+  <div class="add-modal">
+    <h3>章を追加</h3>
+    <div class="form-group">
+      <label class="form-label">章番号</label>
+      <input class="form-input" id="newChapterNum" type="number" placeholder="1" min="1" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">章タイトル（任意）</label>
+      <input class="form-input" id="newChapterTitle" placeholder="タイトルなし" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">目標文字数</label>
+      <input class="form-input" id="newChapterTarget" type="number" placeholder="5000" value="5000" />
+    </div>
+    <div class="form-actions">
+      <button class="btn-modal btn-close" onclick="closeAddModal()">キャンセル</button>
+      <button class="btn-modal btn-save" onclick="addChapter()">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BULK ADD MODAL ===== -->
+<div class="modal-overlay" id="bulkModal">
+  <div class="add-modal">
+    <h3>章をまとめて追加</h3>
+    <div class="form-group">
+      <label class="form-label">開始章番号</label>
+      <input class="form-input" id="bulkStart" type="number" placeholder="1" value="1" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">終了章番号</label>
+      <input class="form-input" id="bulkEnd" type="number" placeholder="10" value="10" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">各章の目標文字数</label>
+      <input class="form-input" id="bulkTarget" type="number" placeholder="5000" value="5000" />
+    </div>
+    <div class="form-actions">
+      <button class="btn-modal btn-close" onclick="closeBulkModal()">キャンセル</button>
+      <button class="btn-modal btn-save" onclick="bulkAddChapters()">追加</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA STORE =====
+const STORAGE_KEY = 'translationTracker_v1';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { chapters: [], streak: 0, lastActivity: null };
+    return JSON.parse(raw);
+  } catch(e) { return { chapters: [], streak: 0, lastActivity: null }; }
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let data = loadData();
+let currentChapterId = null;
+
+// ===== BOOK COLORS =====
+function getBookColor(pct) {
+  if (pct === 0) return { bg: '#2a1e14', fill: null };
+  if (pct < 25)  return { bg: '#2a1e14', fill: '#7a4a28' };
+  if (pct < 50)  return { bg: '#2a1e14', fill: '#a06030' };
+  if (pct < 75)  return { bg: '#2a1e14', fill: '#c8854a' };
+  if (pct < 100) return { bg: '#2a1e14', fill: '#d4a870' };
+  return { bg: '#c8956c', fill: null }; // fully done
+}
+
+function getBookWidth(chapterIndex) {
+  // Vary book widths slightly for realism
+  const widths = [22, 26, 20, 28, 24, 18, 30, 22, 25, 19];
+  return widths[chapterIndex % widths.length];
+}
+
+function getBookHeight() {
+  const heights = [95, 100, 90, 105, 92, 98, 88, 102, 96, 94];
+  return heights[Math.floor(Math.random() * heights.length)];
+}
+
+// ===== RENDER =====
+const BOOKS_PER_SHELF = 18;
+
+function renderShelves() {
+  const container = document.getElementById('shelvesContainer');
+  const empty = document.getElementById('emptyState');
+  
+  if (data.chapters.length === 0) {
+    empty.style.display = 'block';
+    container.innerHTML = '';
+    container.appendChild(empty);
+    updateStats();
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Sort chapters by number
+  const sorted = [...data.chapters].sort((a,b) => a.num - b.num);
+  const shelves = [];
+  for (let i = 0; i < sorted.length; i += BOOKS_PER_SHELF) {
+    shelves.push(sorted.slice(i, i + BOOKS_PER_SHELF));
+  }
+
+  container.innerHTML = '';
+  shelves.forEach((shelfBooks, si) => {
+    const shelfDiv = document.createElement('div');
+    shelfDiv.className = 'shelf-row';
+
+    const booksRow = document.createElement('div');
+    booksRow.className = 'books-row';
+
+    shelfBooks.forEach((ch, bi) => {
+      const pct = ch.targetChars > 0
+        ? Math.min(100, Math.round((ch.translatedChars / ch.targetChars) * 100))
+        : 0;
+      const color = getBookColor(pct);
+      const width = getBookWidth(si * BOOKS_PER_SHELF + bi);
+      const height = 88 + (ch.num % 5) * 4;
+
+      const book = document.createElement('div');
+      book.className = 'book';
+      book.dataset.id = ch.id;
+      book.onclick = () => openChapterModal(ch.id);
+
+      const titleShort = ch.title
+        ? (ch.title.length > 6 ? ch.title.slice(0,6) + '…' : ch.title)
+        : `第${ch.num}章`;
+
+      book.innerHTML = `
+        <div class="book-spine" style="width:${width}px;height:${height}px;background:${color.bg};">
+          ${color.fill ? `<div class="book-fill" style="height:${pct}%;background:${color.fill};"></div>` : ''}
+          ${pct === 100 ? '' : ''}
+          <div class="book-title">
+            <div class="book-title-text">${titleShort}</div>
+          </div>
+          <div class="book-chapter-num">${ch.num}</div>
+        </div>
+        <div class="book-tooltip">
+          <div class="tooltip-title">${ch.title || `第${ch.num}章`}</div>
+          <div>${ch.translatedChars.toLocaleString()} / ${ch.targetChars.toLocaleString()} 字</div>
+          <div class="tooltip-pct">${pct}% 完了</div>
+        </div>
+      `;
+      booksRow.appendChild(book);
+    });
+
+    const plank = document.createElement('div');
+    plank.className = 'shelf-plank';
+    plank.innerHTML = `<div class="shelf-number">SHELF ${si + 1}</div>`;
+
+    shelfDiv.appendChild(booksRow);
+    shelfDiv.appendChild(plank);
+    container.appendChild(shelfDiv);
+  });
+
+  updateStats();
+  renderBadges();
+}
+
+// ===== STATS =====
+function updateStats() {
+  const totalTarget = data.chapters.reduce((s, c) => s + c.targetChars, 0);
+  const totalDone = data.chapters.reduce((s, c) => s + c.translatedChars, 0);
+  const pct = totalTarget > 0 ? Math.min(100, (totalDone / totalTarget * 100).toFixed(1)) : 0;
+
+  document.getElementById('totalTranslated').textContent = totalDone.toLocaleString();
+  document.getElementById('bunkoCount').textContent = (totalDone / 100000).toFixed(1);
+  document.getElementById('overallBar').style.width = pct + '%';
+  document.getElementById('overallPct').textContent = pct + '%';
+  document.getElementById('streakDays').textContent = data.streak || 0;
+}
+
+// ===== BADGES =====
+const MILESTONES = [
+  { chars: 10000, label: '一万字', icon: '📖' },
+  { chars: 50000, label: '五万字', icon: '📚' },
+  { chars: 100000, label: '文庫1冊', icon: '🏅' },
+  { chars: 300000, label: '三十万字', icon: '⭐' },
+  { chars: 500000, label: '五十万字', icon: '🌟' },
+  { chars: 1000000, label: '百万字！', icon: '🏆' },
+];
+
+function renderBadges() {
+  const totalDone = data.chapters.reduce((s, c) => s + c.translatedChars, 0);
+  const row = document.getElementById('badgesRow');
+  row.innerHTML = '';
+  MILESTONES.forEach(m => {
+    const unlocked = totalDone >= m.chars;
+    const div = document.createElement('div');
+    div.className = 'badge ' + (unlocked ? 'unlocked' : 'locked');
+    div.innerHTML = `<span class="badge-icon">${unlocked ? m.icon : '🔒'}</span>${m.label}`;
+    row.appendChild(div);
+  });
+}
+
+// ===== MODAL: CHAPTER DETAIL =====
+function openChapterModal(id) {
+  const ch = data.chapters.find(c => c.id === id);
+  if (!ch) return;
+  currentChapterId = id;
+
+  document.getElementById('modalChapterBadge').textContent = `第${ch.num}章`;
+  document.getElementById('modalTitleInput').value = ch.title || '';
+  document.getElementById('modalTargetChars').value = ch.targetChars || 5000;
+  document.getElementById('originalText').value = ch.originalText || '';
+  document.getElementById('translatedText').value = ch.translatedText || '';
+
+  updateModalProgress(ch.translatedChars, ch.targetChars);
+  updateCharCounts();
+
+  document.getElementById('chapterModal').classList.add('open');
+
+  // Listen for changes
+  document.getElementById('translatedText').oninput = () => {
+    const txt = document.getElementById('translatedText').value;
+    const chars = countJapanese(txt);
+    const target = parseInt(document.getElementById('modalTargetChars').value) || ch.targetChars;
+    document.getElementById('translatedCount').textContent = chars + ' 字';
+    document.getElementById('modalTranslatedCount').textContent = chars + ' 字';
+    updateModalProgress(chars, target);
+  };
+  document.getElementById('originalText').oninput = updateCharCounts;
+  document.getElementById('modalTargetChars').oninput = () => {
+    const target = parseInt(document.getElementById('modalTargetChars').value) || 1;
+    const chars = countJapanese(document.getElementById('translatedText').value);
+    updateModalProgress(chars, target);
+  };
+}
+
+function countJapanese(text) {
+  // Count excluding whitespace/newlines for meaningful char count
+  return text.replace(/\s/g, '').length;
+}
+
+function updateCharCounts() {
+  const orig = document.getElementById('originalText').value;
+  const trans = document.getElementById('translatedText').value;
+  document.getElementById('originalCount').textContent = orig.replace(/\s/g,'').length + ' 字';
+  document.getElementById('translatedCount').textContent = countJapanese(trans) + ' 字';
+}
+
+function updateModalProgress(done, target) {
+  const pct = target > 0 ? Math.min(100, Math.round(done / target * 100)) : 0;
+  document.getElementById('modalProgressFill').style.width = pct + '%';
+  document.getElementById('modalPctText').textContent = pct + '%';
+  document.getElementById('modalTranslatedCount').textContent = done.toLocaleString() + ' 字';
+}
+
+function saveChapter() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+
+  ch.title = document.getElementById('modalTitleInput').value.trim();
+  ch.targetChars = parseInt(document.getElementById('modalTargetChars').value) || 5000;
+  ch.originalText = document.getElementById('originalText').value;
+  ch.translatedText = document.getElementById('translatedText').value;
+  ch.translatedChars = countJapanese(ch.translatedText);
+
+  // Update streak
+  const today = new Date().toDateString();
+  if (data.lastActivity !== today && ch.translatedChars > 0) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (data.lastActivity === yesterday) {
+      data.streak = (data.streak || 0) + 1;
+    } else if (data.lastActivity !== today) {
+      data.streak = 1;
+    }
+    data.lastActivity = today;
+  }
+
+  saveData(data);
+  renderShelves();
+  closeChapterModal();
+}
+
+function closeChapterModal() {
+  document.getElementById('chapterModal').classList.remove('open');
+  currentChapterId = null;
+}
+
+// ===== ADD CHAPTER =====
+function openAddModal() {
+  // Auto-suggest next chapter number
+  const nums = data.chapters.map(c => c.num);
+  const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+  document.getElementById('newChapterNum').value = next;
+  document.getElementById('newChapterTitle').value = '';
+  document.getElementById('newChapterTarget').value = 5000;
+  document.getElementById('addModal').classList.add('open');
+}
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+function addChapter() {
+  const num = parseInt(document.getElementById('newChapterNum').value);
+  const title = document.getElementById('newChapterTitle').value.trim();
+  const target = parseInt(document.getElementById('newChapterTarget').value) || 5000;
+  if (!num || num < 1) return alert('章番号を入力してください');
+  if (data.chapters.find(c => c.num === num)) return alert(`第${num}章はすでに存在します`);
+
+  data.chapters.push({
+    id: Date.now() + Math.random(),
+    num, title, targetChars: target,
+    translatedChars: 0, originalText: '', translatedText: ''
+  });
+  saveData(data);
+  renderShelves();
+  closeAddModal();
+}
+
+// ===== BULK ADD =====
+function openBulkAddModal() {
+  const nums = data.chapters.map(c => c.num);
+  const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+  document.getElementById('bulkStart').value = next;
+  document.getElementById('bulkEnd').value = next + 9;
+  document.getElementById('bulkTarget').value = 5000;
+  document.getElementById('bulkModal').classList.add('open');
+}
+function closeBulkModal() { document.getElementById('bulkModal').classList.remove('open'); }
+
+function bulkAddChapters() {
+  const start = parseInt(document.getElementById('bulkStart').value);
+  const end = parseInt(document.getElementById('bulkEnd').value);
+  const target = parseInt(document.getElementById('bulkTarget').value) || 5000;
+  if (!start || !end || start > end) return alert('章番号の範囲を確認してください');
+  if (end - start > 200) return alert('一度に追加できるのは200章までです');
+
+  for (let i = start; i <= end; i++) {
+    if (!data.chapters.find(c => c.num === i)) {
+      data.chapters.push({
+        id: Date.now() + Math.random() + i,
+        num: i, title: '', targetChars: target,
+        translatedChars: 0, originalText: '', translatedText: ''
+      });
+    }
+  }
+  saveData(data);
+  renderShelves();
+  closeBulkModal();
+}
+
+// ===== CLICK OUTSIDE TO CLOSE =====
+document.getElementById('chapterModal').addEventListener('click', function(e) {
+  if (e.target === this) closeChapterModal();
+});
+document.getElementById('addModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddModal();
+});
+document.getElementById('bulkModal').addEventListener('click', function(e) {
+  if (e.target === this) closeBulkModal();
+});
+
+// ===== INIT =====
+renderShelves();
+</script>
+</body>
+</html>
