@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>my little page</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500&family=Playfair+Display:ital@1&family=DM+Serif+Display:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf8f4;
+    --bg2: #fef3ec;
+    --pink: #f5c6d0;
+    --pink-deep: #e8a0b0;
+    --mint: #c4e8df;
+    --mint-deep: #8ecfc3;
+    --lavender: #ddd0f0;
+    --lavender-deep: #b8a0d8;
+    --yellow: #fce9c0;
+    --yellow-deep: #f0cc80;
+    --blue: #c8dff5;
+    --blue-deep: #90bce8;
+    --peach: #fdd8c4;
+    --peach-deep: #f0a880;
+    --ink: #3a2e2a;
+    --ink-mid: #7a6858;
+    --ink-light: #b0a090;
+    --white: #fff;
+    --shadow: rgba(180,140,120,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Zen Maru Gothic', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== BACKGROUND DECORATION ===== */
+  .bg-decor {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.35;
+  }
+  .blob1 { width: 400px; height: 400px; background: var(--pink); top: -100px; right: -80px; }
+  .blob2 { width: 350px; height: 350px; background: var(--mint); bottom: 50px; left: -80px; }
+  .blob3 { width: 280px; height: 280px; background: var(--lavender); top: 40%; left: 30%; }
+  .blob4 { width: 200px; height: 200px; background: var(--yellow); bottom: 200px; right: 100px; }
+
+  /* floating dots */
+  .dots-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: radial-gradient(circle, rgba(180,140,120,0.08) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /* ===== LAYOUT ===== */
+  .page-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 60px 32px 80px;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 56px;
+    animation: fadeUp 0.7s ease both;
+  }
+  .header-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--ink-light);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 3rem;
+    color: var(--ink);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  .header h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--pink-deep), var(--lavender-deep));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header-desc {
+    font-size: 0.78rem;
+    color: var(--ink-mid);
+    letter-spacing: 0.04em;
+    line-height: 1.8;
+  }
+  .header-deco {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 16px 0 0;
+  }
+  .deco-line {
+    width: 48px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--ink-light));
+  }
+  .deco-line.r { background: linear-gradient(to left, transparent, var(--ink-light)); }
+  .deco-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--pink-deep); }
+
+  /* ===== SECTION TITLE ===== */
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--ink-light), transparent);
+    opacity: 0.4;
+  }
+
+  /* ===== CARDS GRID ===== */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 50px;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 28px 22px 22px;
+    text-decoration: none;
+    color: var(--ink);
+    box-shadow: 0 2px 16px var(--shadow);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    animation: fadeUp 0.6s ease both;
+    display: block;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 32px var(--shadow);
+  }
+
+  /* color accent strip at top */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    border-radius: 20px 20px 0 0;
+  }
+  .card.pink::before   { background: linear-gradient(to right, var(--pink), var(--pink-deep)); }
+  .card.mint::before   { background: linear-gradient(to right, var(--mint), var(--mint-deep)); }
+  .card.lavender::before { background: linear-gradient(to right, var(--lavender), var(--lavender-deep)); }
+  .card.yellow::before { background: linear-gradient(to right, var(--yellow), var(--yellow-deep)); }
+  .card.blue::before   { background: linear-gradient(to right, var(--blue), var(--blue-deep)); }
+  .card.peach::before  { background: linear-gradient(to right, var(--peach), var(--peach-deep)); }
+
+  /* card icon blob */
+  .card-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+  }
+  .card.pink   .card-icon-wrap { background: #fde8ed; }
+  .card.mint   .card-icon-wrap { background: #e0f4f0; }
+  .card.lavender .card-icon-wrap { background: #ede6f8; }
+  .card.yellow .card-icon-wrap { background: #fdf2d8; }
+  .card.blue   .card-icon-wrap { background: #deeefa; }
+  .card.peach  .card-icon-wrap { background: #feeadc; }
+
+  .card-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .card-desc {
+    font-size: 0.68rem;
+    color: var(--ink-mid);
+    line-height: 1.75;
+    letter-spacing: 0.02em;
+  }
+
+  /* coming soon badge */
+  .badge-soon {
+    display: inline-block;
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: var(--bg2);
+    color: var(--ink-light);
+    border: 1px solid #e8ddd8;
+    margin-top: 10px;
+  }
+
+  /* card bottom arrow */
+  .card-arrow {
+    position: absolute;
+    bottom: 18px;
+    right: 18px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    transform: translateX(-4px);
+  }
+  .card.pink   .card-arrow { background: #fde8ed; color: var(--pink-deep); }
+  .card.mint   .card-arrow { background: #e0f4f0; color: var(--mint-deep); }
+  .card.lavender .card-arrow { background: #ede6f8; color: var(--lavender-deep); }
+  .card.yellow .card-arrow { background: #fdf2d8; color: var(--yellow-deep); }
+  .card.blue   .card-arrow { background: #deeefa; color: var(--blue-deep); }
+  .card.peach  .card-arrow { background: #feeadc; color: var(--peach-deep); }
+  .card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+
+  /* animation delays */
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.12s; }
+  .card:nth-child(3) { animation-delay: 0.18s; }
+  .card:nth-child(4) { animation-delay: 0.24s; }
+  .card:nth-child(5) { animation-delay: 0.30s; }
+  .card:nth-child(6) { animation-delay: 0.36s; }
+
+  /* ===== DIARY / MEMO SECTION ===== */
+  .memo-box {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 24px 26px;
+    box-shadow: 0 2px 16px var(--shadow);
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .memo-box textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.78rem;
+    line-height: 2;
+    color: var(--ink);
+    background: transparent;
+    min-height: 80px;
+  }
+  .memo-box textarea::placeholder { color: var(--ink-light); }
+  .memo-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e8ddd8;
+  }
+  .memo-date {
+    font-size: 0.6rem;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+  }
+  .memo-save {
+    padding: 5px 14px;
+    background: var(--pink);
+    border: none;
+    border-radius: 20px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.65rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.2s;
+    letter-spacing: 0.06em;
+  }
+  .memo-save:hover { background: var(--pink-deep); }
+  .memo-saved-note {
+    font-size: 0.6rem;
+    color: var(--mint-deep);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .memo-saved-note.show { opacity: 1; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    margin-top: 60px;
+    font-size: 0.62rem;
+    color: var(--ink-light);
+    letter-spacing: 0.1em;
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+  .footer-deco { margin-bottom: 8px; font-size: 1rem; }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 520px) {
+    .page-wrap { padding: 40px 20px 60px; }
+    .header h1 { font-size: 2.2rem; }
+    .cards-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { padding: 20px 16px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-decor">
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+  <div class="bg-blob blob3"></div>
+  <div class="bg-blob blob4"></div>
+</div>
+<div class="dots-bg"></div>
+
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-eyebrow">welcome to</div>
+    <h1>my little <em>page</em></h1>
+    <div class="header-deco">
+      <div class="deco-line"></div>
+      <div class="deco-dot"></div>
+      <div class="deco-line r"></div>
+    </div>
+    <p class="header-desc">自分だけの小さなホームページ。<br>好きな機能を集めてちょっとずつ育てていく場所。</p>
+  </div>
+
+  <!-- TODAY'S MEMO -->
+  <div class="section-label">今日のひとこと</div>
+  <div class="memo-box" style="margin-bottom:40px;">
+    <textarea id="memoTextarea" placeholder="今日の気分や、ちょっとしたメモをどうぞ…" rows="3"></textarea>
+    <div class="memo-footer">
+      <span class="memo-date" id="memoDate"></span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="memo-saved-note" id="memoSavedNote">保存しました ✓</span>
+        <button class="memo-save" onclick="saveMemo()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="section-label">ツール</div>
+  <div class="cards-grid">
+
+    <!-- 翻訳トラッカー -->
+    <a class="card pink" href="./translation/index.html">
+      <div class="card-icon-wrap">📚</div>
+      <div class="card-title">翻訳の本棚</div>
+      <div class="card-desc">韓国語小説の翻訳進捗を本棚で管理。章ごとに背表紙が色づいていく。</div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <!-- 単語帳（coming soon） -->
+    <div class="card mint">
+      <div class="card-icon-wrap">🃏</div>
+      <div class="card-title">単語帳</div>
+      <div class="card-desc">翻訳中に出てきた韓国語の単語や表現をストック。</div>
+      <div class="badge-soon">coming soon</div>
+    </div>
+
+    <!-- 表現メモ（coming soon） -->
+    <div class="card lavender">
+      <div class="card-icon-wrap">✏️</div>
+      <div class="card-title">表現ストック</div>
+      <div class="card-desc">「この韓国語、日本語でどう訳す？」と迷った表現を記録。</div>
+      <div class="badge-soon">coming soon</div>
+    </div>
+
+    <!-- 空きスロット -->
+    <div class="card yellow" style="opacity:0.5;cursor:default;">
+      <div class="card-icon-wrap">＋</div>
+      <div class="card-title">空きスロット</div>
+      <div class="card-desc">新しい機能をここに追加できます。</div>
+      <div class="badge-soon">coming soon</div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-deco">🌸</div>
+    my little page &nbsp;·&nbsp; made with care
+  </div>
+
+</div>
+
+<script>
+  // Date display
+  function formatDate() {
+    const d = new Date();
+    const days = ['日','月','火','水','木','金','土'];
+    return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）`;
+  }
+  document.getElementById('memoDate').textContent = formatDate();
+
+  // Memo save/load
+  const MEMO_KEY = 'homeMemo_v1';
+  const saved = localStorage.getItem(MEMO_KEY);
+  if (saved) {
+    try {
+      const obj = JSON.parse(saved);
+      document.getElementById('memoTextarea').value = obj.text || '';
+    } catch(e) {}
+  }
+
+  function saveMemo() {
+    const text = document.getElementById('memoTextarea').value;
+    localStorage.setItem(MEMO_KEY, JSON.stringify({ text, date: new Date().toISOString() }));
+    const note = document.getElementById('memoSavedNote');
+    note.classList.add('show');
+    setTimeout(() => note.classList.remove('show'), 2000);
+  }
+
+  // Auto-save on typing (debounced)
+  let saveTimer;
+  document.getElementById('memoTextarea').addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveMemo, 1200);
+  });
+</script>
+</body>
+</html>
