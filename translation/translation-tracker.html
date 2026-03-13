@@ -747,7 +747,7 @@
         <span class="val" id="bunkoCount">0</span>
         <span class="lbl">文庫本換算（冊）</span>
       </div>
-      <div class="streak-pill">🔥 <span id="streakDays">0</span> 日連続</div>
+      <div class="streak-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0"><path d="M12 2c0 6-6 7-6 12a6 6 0 0 0 12 0c0-5-6-6-6-12z"/><path d="M12 12c0 3-2 4-2 6a2 2 0 0 0 4 0c0-2-2-3-2-6z"/></svg> <span id="streakDays">0</span> 日連続</div>
     </div>
   </div>
 
@@ -764,10 +764,10 @@
 
   <!-- CONTROLS -->
   <div class="controls">
-    <button class="btn btn-primary" onclick="openAddModal()">＋ 章を追加</button>
-    <button class="btn btn-secondary" onclick="openBulkAddModal()">まとめて追加</button>
-    <button class="btn btn-secondary" onclick="exportData()" style="margin-left:auto;">📤 エクスポート</button>
-    <button class="btn btn-secondary" onclick="document.getElementById('importInput').click()">📥 インポート</button>
+    <button class="btn btn-primary" onclick="openAddModal()" style="display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 章を追加</button>
+    <button class="btn btn-secondary" onclick="openBulkAddModal()" style="display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="9" y="7" width="4" height="14" rx="1"/><rect x="15" y="5" width="4" height="16" rx="1"/><line x1="2" y1="21" x2="22" y2="21"/></svg> まとめて追加</button>
+    <button class="btn btn-secondary" onclick="exportData()" style="margin-left:auto;display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> エクスポート</button>
+    <button class="btn btn-secondary" onclick="document.getElementById('importInput').click()" style="display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> インポート</button>
     <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(event)" />
   </div>
 
@@ -831,7 +831,7 @@
     <div class="chapter-modal-footer">
       <button class="btn btn-primary" id="saveBtn" onclick="saveChapter()">保存</button>
       <button class="btn btn-secondary" onclick="closeChapterModal()">閉じる</button>
-      <button class="btn btn-secondary" id="completeBtn" onclick="markComplete()" style="border-color:var(--mint-deep);color:var(--mint-deep);">✦ 翻訳完成</button>
+      <button class="btn btn-secondary" id="completeBtn" onclick="markComplete()" style="border-color:var(--mint-deep);color:var(--mint-deep);display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M20 6L9 17l-5-5"/></svg> 翻訳完成</button>
       <button class="btn btn-secondary" id="editModeBtn" onclick="switchToEditMode()" style="display:none;">編集に戻る</button>
       <div class="footer-note">原文貼り付け時に目標文字数を自動設定 · 日本語の割合で進捗を計算</div>
     </div>
@@ -841,7 +841,7 @@
 <!-- ===== ADD MODAL ===== -->
 <div class="modal-overlay" id="addModal">
   <div class="small-modal">
-    <h3>📖 章を追加</h3>
+    <h3>章を追加</h3>
     <div class="form-group">
       <label class="form-label">章番号</label>
       <input class="form-input" id="newChapterNum" type="number" placeholder="1" min="1" />
@@ -860,7 +860,7 @@
 <!-- ===== BULK MODAL ===== -->
 <div class="modal-overlay" id="bulkModal">
   <div class="small-modal">
-    <h3>📚 まとめて追加</h3>
+    <h3>まとめて追加</h3>
     <div class="form-group">
       <label class="form-label">開始章番号</label>
       <input class="form-input" id="bulkStart" type="number" value="1" />
@@ -914,7 +914,7 @@ function renderShelves() {
   if (data.chapters.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📚</div>
+        <div class="empty-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="width:52px;height:52px;color:var(--ink-light)"><rect x="8" y="10" width="8" height="24" rx="1.5"/><rect x="20" y="16" width="8" height="18" rx="1.5"/><rect x="32" y="13" width="8" height="21" rx="1.5"/><line x1="4" y1="38" x2="44" y2="38"/></svg></div>
         本棚が空です。<br>「＋ 章を追加」から始めましょう。
       </div>`;
     updateStats();
@@ -995,13 +995,21 @@ function updateStats() {
 }
 
 // ===== BADGES =====
+const SVG_BOOK     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><path d="M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z"/><path d="M12 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z"/></svg>`;
+const SVG_BOOKS    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="9" y="7" width="4" height="14" rx="1"/><rect x="15" y="5" width="4" height="16" rx="1"/><line x1="2" y1="21" x2="22" y2="21"/></svg>`;
+const SVG_MEDAL    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><circle cx="12" cy="15" r="5"/><path d="M9 3h6l2 4-5 3-5-3 2-4z"/></svg>`;
+const SVG_STAR     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
+const SVG_STAR2    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/><circle cx="12" cy="12" r="2"/></svg>`;
+const SVG_TROPHY   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0"><path d="M6 3h12v8a6 6 0 0 1-12 0V3z"/><path d="M6 7H3a1 1 0 0 0-1 1v1a4 4 0 0 0 4 4"/><path d="M18 7h3a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4"/><line x1="9" y1="21" x2="15" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+const SVG_LOCK     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;opacity:0.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
+
 const MILESTONES = [
-  { chars: 10000,  label: '一万字',   icon: '📖' },
-  { chars: 50000,  label: '五万字',   icon: '📚' },
-  { chars: 100000, label: '文庫1冊',  icon: '🏅' },
-  { chars: 300000, label: '三十万字', icon: '⭐' },
-  { chars: 500000, label: '五十万字', icon: '🌟' },
-  { chars: 1000000,label: '百万字！', icon: '🏆' },
+  { chars: 10000,   label: '一万字',   icon: SVG_BOOK   },
+  { chars: 50000,   label: '五万字',   icon: SVG_BOOKS  },
+  { chars: 100000,  label: '文庫1冊',  icon: SVG_MEDAL  },
+  { chars: 300000,  label: '三十万字', icon: SVG_STAR   },
+  { chars: 500000,  label: '五十万字', icon: SVG_STAR2  },
+  { chars: 1000000, label: '百万字！', icon: SVG_TROPHY },
 ];
 function renderBadges() {
   const totalDone = data.chapters.reduce((s,c) => s + c.translatedChars, 0);
@@ -1011,7 +1019,7 @@ function renderBadges() {
     const unlocked = totalDone >= m.chars;
     const div = document.createElement('div');
     div.className = 'badge ' + (unlocked ? 'unlocked' : 'locked');
-    div.innerHTML = `${unlocked ? m.icon : '🔒'} ${m.label}`;
+    div.innerHTML = `${unlocked ? m.icon : SVG_LOCK} ${m.label}`;
     row.appendChild(div);
   });
 }
