@@ -907,7 +907,14 @@ function getBookWidth(idx) {
 }
 
 // ===== RENDER =====
-const BOOKS_PER_SHELF = 18;
+function calcBooksPerShelf() {
+  // コンテナ幅から1段あたりの冊数を動的に計算
+  const container = document.getElementById('shelvesContainer');
+  const containerWidth = container.offsetWidth || window.innerWidth - 64;
+  const shelfWidth = containerWidth - 48; // padding分を引く
+  const avgBookWidth = 24 + 4; // 平均本幅 + gap
+  return Math.max(5, Math.floor(shelfWidth / avgBookWidth));
+}
 
 function renderShelves() {
   const container = document.getElementById('shelvesContainer');
@@ -921,10 +928,11 @@ function renderShelves() {
     return;
   }
 
+  const booksPerShelf = calcBooksPerShelf();
   const sorted = [...data.chapters].sort((a,b) => a.num - b.num);
   const shelves = [];
-  for (let i = 0; i < sorted.length; i += BOOKS_PER_SHELF) {
-    shelves.push(sorted.slice(i, i + BOOKS_PER_SHELF));
+  for (let i = 0; i < sorted.length; i += booksPerShelf) {
+    shelves.push(sorted.slice(i, i + booksPerShelf));
   }
 
   container.innerHTML = '';
@@ -936,7 +944,7 @@ function renderShelves() {
     booksRow.className = 'books-row';
 
     shelfBooks.forEach((ch, bi) => {
-      const globalIdx = si * BOOKS_PER_SHELF + bi;
+      const globalIdx = si * booksPerShelf + bi;
       const pct = ch.targetChars > 0
         ? Math.min(100, Math.round(ch.translatedChars / ch.targetChars * 100))
         : 0;
@@ -1286,6 +1294,10 @@ function showToast(msg, type = 'success') {
 
 // ===== INIT =====
 renderShelves();
+window.addEventListener('resize', () => {
+  clearTimeout(window._resizeTimer);
+  window._resizeTimer = setTimeout(renderShelves, 150);
+});
 </script>
 </body>
 </html>
