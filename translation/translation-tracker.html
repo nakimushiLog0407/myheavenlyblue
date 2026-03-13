@@ -701,6 +701,160 @@
   .book-spine.completed {
     box-shadow: 2px 0 10px rgba(180,140,120,0.4), inset -2px 0 4px rgba(0,0,0,0.06), inset 0 0 12px rgba(255,255,255,0.15);
   }
+  .btn-danger {
+    border: 1px solid #f0a880;
+    color: #c0604a;
+    background: white;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.18s;
+  }
+  .btn-danger:hover { background: #fff0ec; }
+  .episodes-view {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .episodes-toolbar {
+    padding: 12px 20px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border-bottom: 1px solid rgba(180,140,120,0.12);
+    background: var(--white);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .episodes-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .episode-item {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 1px 6px var(--shadow);
+    border: 1px solid transparent;
+  }
+  .episode-item:hover { border-color: var(--pink); transform: translateX(3px); }
+  .episode-item.completed-ep { border-color: var(--mint); }
+  .episode-num {
+    font-size: 0.62rem;
+    color: var(--ink-light);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    min-width: 40px;
+  }
+  .episode-title {
+    flex: 1;
+    font-size: 0.82rem;
+    color: var(--ink);
+  }
+  .episode-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 100px;
+  }
+  .episode-bar-track {
+    width: 60px;
+    height: 4px;
+    background: rgba(180,140,120,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .episode-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--pink-deep), var(--lavender-deep));
+    border-radius: 2px;
+  }
+  .episode-pct {
+    font-size: 0.6rem;
+    color: var(--pink-deep);
+    white-space: nowrap;
+  }
+  .episode-done-badge {
+    font-size: 0.55rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: var(--mint);
+    color: var(--ink-mid);
+    white-space: nowrap;
+  }
+  .episode-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-light);
+    font-size: 0.78rem;
+    line-height: 2;
+  }
+
+  /* ===== 話エディタビュー ===== */
+  .episode-editor-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    display: none;
+  }
+  .episode-editor-view.active { display: flex; }
+  .episode-editor-header {
+    padding: 10px 20px;
+    background: var(--bg2);
+    border-bottom: 1px solid rgba(180,140,120,0.12);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .ep-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.65rem;
+    color: var(--ink-light);
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(180,140,120,0.25);
+    background: var(--white);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .ep-back-btn:hover { background: var(--pink); color: var(--ink); }
+  .ep-title-input {
+    flex: 1;
+    border: none;
+    border-bottom: 1.5px solid rgba(180,140,120,0.2);
+    background: transparent;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    padding: 2px 6px;
+    outline: none;
+    min-width: 0;
+  }
+  .ep-title-input:focus { border-bottom-color: var(--pink-deep); }
+
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -785,60 +939,152 @@
 <!-- ===== CHAPTER MODAL ===== -->
 <div class="modal-overlay" id="chapterModal">
   <div class="chapter-modal">
+
+    <!-- ヘッダー（常時表示） -->
     <div class="chapter-modal-header">
       <div class="chapter-badge" id="modalChapterBadge">第1章</div>
       <input class="chapter-title-input" id="modalTitleInput" placeholder="章タイトルを入力…" />
       <button class="modal-close-btn" onclick="closeChapterModal()">✕</button>
     </div>
-    <div class="chapter-modal-meta">
+
+    <!-- 章進捗メタ（話一覧時のみ表示） -->
+    <div class="chapter-modal-meta" id="chapterMeta">
       <div class="meta-item">
-        <div class="meta-lbl">原文字数（自動）</div>
-        <div class="meta-val" id="modalTargetChars">— 字</div>
+        <div class="meta-lbl">話数</div>
+        <div class="meta-val" id="metaEpisodeCount">0 話</div>
       </div>
       <div class="meta-item">
         <div class="meta-lbl">翻訳済み</div>
         <div class="meta-val" id="modalTranslatedCount">0 字</div>
       </div>
       <div class="meta-progress">
-        <div class="meta-lbl">進捗（韓国語→日本語）</div>
+        <div class="meta-lbl">章の進捗</div>
         <div class="meta-progress-track">
           <div class="meta-progress-fill" id="modalProgressFill" style="width:0%"></div>
         </div>
       </div>
       <div class="meta-pct" id="modalPctText">0%</div>
     </div>
-    <div class="chapter-modal-editors">
-      <div class="editor-pane">
-        <div class="editor-header">
-          <span class="editor-lang" id="editorLangLabel">원문을 붙여넣고, 위에 번역문을 덮어쓰세요</span>
-          <div class="editor-counts" id="editorCounts">
-            <div class="editor-count-item">
-              <span class="dot dot-korean"></span>
-              <span>韓国語</span>
-              <span class="num" id="koreanCount">0 字</span>
-            </div>
-            <div class="editor-count-item">
-              <span class="dot dot-japanese"></span>
-              <span>日本語</span>
-              <span class="num" id="japaneseCount">0 字</span>
-            </div>
+
+    <!-- 話一覧ビュー -->
+    <div class="episodes-view" id="episodesView">
+      <div class="episodes-toolbar">
+        <button class="btn btn-primary" onclick="openAddEpisodeModal()" style="display:flex;align-items:center;gap:5px;font-size:0.68rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          話を追加
+        </button>
+        <button class="btn btn-secondary" onclick="openBulkAddEpisodeModal()" style="font-size:0.68rem;">まとめて追加</button>
+        <div style="flex:1;"></div>
+        <button class="btn btn-danger" onclick="deleteChapter()" style="font-size:0.65rem;padding:4px 10px;display:flex;align-items:center;gap:4px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/><path d="M10,11v6"/><path d="M14,11v6"/><path d="M9,6V4h6v2"/></svg>
+          章を削除
+        </button>
+      </div>
+      <div class="episodes-list" id="episodesList"></div>
+    </div>
+
+    <!-- 話エディタビュー -->
+    <div class="episode-editor-view" id="episodeEditorView">
+      <div class="episode-editor-header">
+        <button class="ep-back-btn" onclick="backToEpisodeList()">← 話一覧</button>
+        <div class="chapter-badge" id="episodeBadge" style="font-size:0.55rem;">第1話</div>
+        <div style="flex:1;"></div>
+        <button class="btn btn-danger" onclick="deleteEpisode()" style="font-size:0.62rem;padding:4px 10px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/><path d="M10,11v6"/><path d="M14,11v6"/><path d="M9,6V4h6v2"/></svg>
+          削除
+        </button>
+      </div>
+      <!-- 進捗メタ -->
+      <div class="chapter-modal-meta" id="episodeMeta">
+        <div class="meta-item">
+          <div class="meta-lbl">原文字数（自動）</div>
+          <div class="meta-val" id="epTargetChars">— 字</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-lbl">翻訳済み</div>
+          <div class="meta-val" id="epTranslatedCount">0 字</div>
+        </div>
+        <div class="meta-progress">
+          <div class="meta-lbl">進捗（韓国語→日本語）</div>
+          <div class="meta-progress-track">
+            <div class="meta-progress-fill" id="epProgressFill" style="width:0%"></div>
           </div>
         </div>
-        <textarea class="editor-textarea" id="editorText" placeholder="원문을 붙여넣으세요. 그런 다음 번역문으로 덮어쓰세요…"></textarea>
-        <div class="finished-view" id="finishedView"></div>
+        <div class="meta-pct" id="epPctText">0%</div>
+      </div>
+      <!-- エディタ -->
+      <div class="chapter-modal-editors">
+        <div class="editor-pane">
+          <div class="editor-header">
+            <span class="editor-lang" id="epEditorLangLabel">원문을 붙여넣고, 위에 번역문을 덮어쓰세요</span>
+            <div class="editor-counts" id="epEditorCounts">
+              <div class="editor-count-item">
+                <span class="dot dot-korean"></span><span>韓国語</span>
+                <span class="num" id="epKoreanCount">0 字</span>
+              </div>
+              <div class="editor-count-item">
+                <span class="dot dot-japanese"></span><span>日本語</span>
+                <span class="num" id="epJapaneseCount">0 字</span>
+              </div>
+            </div>
+          </div>
+          <textarea class="editor-textarea" id="epEditorText" placeholder="원문을 붙여넣으세요…"></textarea>
+          <div class="finished-view" id="epFinishedView"></div>
+        </div>
+      </div>
+      <!-- フッター -->
+      <div class="chapter-modal-footer">
+        <button class="btn btn-primary" id="epSaveBtn" onclick="saveEpisode()">保存</button>
+        <button class="btn btn-secondary" onclick="backToEpisodeList()">閉じる</button>
+        <button class="btn btn-secondary" id="epCompleteBtn" onclick="markEpisodeComplete()" style="border-color:var(--mint-deep);color:var(--mint-deep);display:flex;align-items:center;gap:5px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M20 6L9 17l-5-5"/></svg> 翻訳完成
+        </button>
+        <button class="btn btn-secondary" id="epEditModeBtn" onclick="switchEpisodeToEditMode()" style="display:none;">編集に戻る</button>
+        <!-- 読み物モード時のページめくりナビ -->
+        <div id="epPageNav" style="display:none;margin-left:auto;display:none;align-items:center;gap:6px;">
+          <button class="btn btn-secondary" id="epPrevBtn" onclick="navEpisode(-1)" style="font-size:0.65rem;padding:4px 12px;">← 前の話</button>
+          <button class="btn btn-secondary" id="epNextBtn" onclick="navEpisode(1)"  style="font-size:0.65rem;padding:4px 12px;">次の話 →</button>
+        </div>
+        <div class="footer-note">原文貼り付け時に目標文字数を自動設定</div>
       </div>
     </div>
-    <div class="chapter-modal-footer">
-      <button class="btn btn-primary" id="saveBtn" onclick="saveChapter()">保存</button>
-      <button class="btn btn-secondary" onclick="closeChapterModal()">閉じる</button>
-      <button class="btn btn-secondary" id="completeBtn" onclick="markComplete()" style="border-color:var(--mint-deep);color:var(--mint-deep);display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M20 6L9 17l-5-5"/></svg> 翻訳完成</button>
-      <button class="btn btn-secondary" id="editModeBtn" onclick="switchToEditMode()" style="display:none;">編集に戻る</button>
-      <div class="footer-note">原文貼り付け時に目標文字数を自動設定 · 日本語の割合で進捗を計算</div>
+
+  </div>
+</div>
+
+<!-- ===== ADD EPISODE MODAL ===== -->
+<div class="modal-overlay" id="addEpisodeModal">
+  <div class="small-modal">
+    <h3>話を追加</h3>
+    <div class="form-group">
+      <label class="form-label">話番号</label>
+      <input class="form-input" id="newEpisodeNum" type="number" placeholder="1" min="1" />
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeAddEpisodeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="addEpisode()">追加</button>
     </div>
   </div>
 </div>
 
-<!-- ===== ADD MODAL ===== -->
+<!-- ===== BULK ADD EPISODE MODAL ===== -->
+<div class="modal-overlay" id="bulkEpisodeModal">
+  <div class="small-modal">
+    <h3>話をまとめて追加</h3>
+    <div class="form-group">
+      <label class="form-label">開始話番号</label>
+      <input class="form-input" id="bulkEpStart" type="number" value="1" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">終了話番号</label>
+      <input class="form-input" id="bulkEpEnd" type="number" value="5" />
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeBulkEpisodeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="bulkAddEpisodes()">追加</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="addModal">
   <div class="small-modal">
     <h3>章を追加</h3>
@@ -1043,144 +1289,313 @@ function countJapanese(text) {
 }
 
 // ===== CHAPTER MODAL =====
+let currentEpisodeId = null;
+
 function openChapterModal(id) {
   const ch = data.chapters.find(c => c.id === id);
   if (!ch) return;
   currentChapterId = id;
+  if (!ch.episodes) ch.episodes = [];
 
   document.getElementById('modalChapterBadge').textContent = `第${ch.num}章`;
   document.getElementById('modalTitleInput').value = ch.title || '';
-  document.getElementById('editorText').value = ch.editorText || '';
 
-  updateEditorCounts(ch.editorText || '', ch.targetChars);
-  document.getElementById('chapterModal').classList.add('open');
-
-  if (ch.completed) {
-    applyCompletedView(ch);
-  } else {
-    applyEditView();
-  }
-
-  document.getElementById('editorText').oninput = () => {
-    const text = document.getElementById('editorText').value;
-    const korean = countKorean(text);
-    const japanese = countJapanese(text);
-    const total = korean + japanese;
-    if (total > 0 && korean > japanese) ch.targetChars = total;
-    updateEditorCounts(text, ch.targetChars);
+  // 章タイトル変更を即時保存
+  document.getElementById('modalTitleInput').oninput = () => {
+    ch.title = document.getElementById('modalTitleInput').value.trim();
+    saveData(data);
+    renderShelves();
   };
-}
 
-function applyCompletedView(ch) {
-  document.getElementById('editorText').classList.add('hidden');
-  document.getElementById('finishedView').classList.add('active');
-  document.getElementById('finishedView').textContent = ch.finishedText || ch.editorText || '';
-  document.getElementById('editorCounts').style.display = 'none';
-  document.getElementById('editorLangLabel').textContent = '完成原稿 · 読み物モード';
-  document.getElementById('saveBtn').style.display = 'none';
-  document.getElementById('completeBtn').style.display = 'none';
-  document.getElementById('editModeBtn').style.display = '';
-  document.querySelector('.chapter-modal-meta').style.display = 'none';
-}
-
-function applyEditView() {
-  document.getElementById('editorText').classList.remove('hidden');
-  document.getElementById('finishedView').classList.remove('active');
-  document.getElementById('editorCounts').style.display = '';
-  document.getElementById('editorLangLabel').textContent = '원문을 붙여넣고, 위에 번역문을 덮어쓰세요';
-  document.getElementById('saveBtn').style.display = '';
-  document.getElementById('completeBtn').style.display = '';
-  document.getElementById('editModeBtn').style.display = 'none';
-  document.querySelector('.chapter-modal-meta').style.display = '';
-}
-
-function markComplete() {
-  const ch = data.chapters.find(c => c.id === currentChapterId);
-  if (!ch) return;
-  const text = document.getElementById('editorText').value;
-  if (!text.trim()) return;
-
-  const korean   = countKorean(text);
-  const japanese = countJapanese(text);
-  const total    = korean + japanese;
-  ch.title        = document.getElementById('modalTitleInput').value.trim();
-  ch.editorText   = text;
-  ch.finishedText = text;
-  if (total > 0 && korean > japanese) ch.targetChars = total;
-  ch.translatedChars = ch.targetChars;
-  ch.completed    = true;
-
-  const today     = new Date().toDateString();
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-  if (data.lastActivity !== today) {
-    data.streak = data.lastActivity === yesterday ? (data.streak || 0) + 1 : 1;
-    data.lastActivity = today;
-  }
-
-  saveData(data);
-  renderShelves();
-  applyCompletedView(ch);
-}
-
-function switchToEditMode() {
-  const ch = data.chapters.find(c => c.id === currentChapterId);
-  if (!ch) return;
-  ch.completed = false;
-  saveData(data);
-  renderShelves();
-  applyEditView();
-}
-
-function updateEditorCounts(text, targetChars) {
-  const korean   = countKorean(text);
-  const japanese = countJapanese(text);
-  const total    = korean + japanese;
-
-  document.getElementById('koreanCount').textContent   = korean.toLocaleString() + ' 字';
-  document.getElementById('japaneseCount').textContent = japanese.toLocaleString() + ' 字';
-
-  // 目標文字数表示
-  const target = targetChars || total || 0;
-  document.getElementById('modalTargetChars').textContent =
-    target > 0 ? target.toLocaleString() + ' 字' : '— 字';
-
-  // 進捗 = 日本語文字数 ÷ 目標文字数
-  const pct = target > 0 ? Math.min(100, Math.round(japanese / target * 100)) : 0;
-  document.getElementById('modalProgressFill').style.width = pct + '%';
-  document.getElementById('modalPctText').textContent = pct + '%';
-  document.getElementById('modalTranslatedCount').textContent = japanese.toLocaleString() + ' 字';
-}
-
-function saveChapter() {
-  const ch = data.chapters.find(c => c.id === currentChapterId);
-  if (!ch) return;
-
-  const text = document.getElementById('editorText').value;
-  const korean   = countKorean(text);
-  const japanese = countJapanese(text);
-  const total    = korean + japanese;
-
-  ch.title      = document.getElementById('modalTitleInput').value.trim();
-  ch.editorText = text;
-  // 韓国語が多ければtarget更新、日本語への置き換えが進んでいればtargetを維持
-  if (total > 0 && korean > japanese) ch.targetChars = total;
-  ch.translatedChars = japanese;
-
-  const today     = new Date().toDateString();
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-  if (data.lastActivity !== today && japanese > 0) {
-    data.streak = data.lastActivity === yesterday ? (data.streak || 0) + 1 : 1;
-    data.lastActivity = today;
-  }
-
-  saveData(data);
-  renderShelves();
-  closeChapterModal();
+  showEpisodesView(ch);
+  document.getElementById('chapterModal').classList.add('open');
 }
 
 function closeChapterModal() {
   document.getElementById('chapterModal').classList.remove('open');
   currentChapterId = null;
+  currentEpisodeId = null;
+}
+
+// ===== 話一覧ビュー =====
+function showEpisodesView(ch) {
+  if (!ch) ch = data.chapters.find(c => c.id === currentChapterId);
+  document.getElementById('episodesView').style.display = 'flex';
+  document.getElementById('episodeEditorView').classList.remove('active');
+  document.getElementById('chapterMeta').style.display = '';
+  updateChapterMeta(ch);
+  renderEpisodeList(ch);
+}
+
+function updateChapterMeta(ch) {
+  const eps = ch.episodes || [];
+  const totalTarget = eps.reduce((s,e) => s + (e.targetChars||0), 0);
+  const totalDone   = eps.reduce((s,e) => s + (e.translatedChars||0), 0);
+  const pct = totalTarget > 0 ? Math.min(100, Math.round(totalDone / totalTarget * 100)) : 0;
+  document.getElementById('metaEpisodeCount').textContent     = eps.length + ' 話';
+  document.getElementById('modalTranslatedCount').textContent = totalDone.toLocaleString() + ' 字';
+  document.getElementById('modalProgressFill').style.width    = pct + '%';
+  document.getElementById('modalPctText').textContent         = pct + '%';
+  // 章の集計値も更新
+  ch.translatedChars = totalDone;
+  ch.targetChars     = totalTarget || ch.targetChars || 0;
+}
+
+function renderEpisodeList(ch) {
+  const list = document.getElementById('episodesList');
+  const eps  = (ch.episodes || []).slice().sort((a,b) => a.num - b.num);
+  if (eps.length === 0) {
+    list.innerHTML = '<div class="episode-empty">話がまだありません。<br>「話を追加」から始めましょう。</div>';
+    return;
+  }
+  list.innerHTML = '';
+  eps.forEach(ep => {
+    const pct = ep.targetChars > 0
+      ? Math.min(100, Math.round(ep.translatedChars / ep.targetChars * 100)) : 0;
+    const item = document.createElement('div');
+    item.className = 'episode-item' + (ep.completed ? ' completed-ep' : '');
+    item.onclick = () => openEpisodeEditor(ep.id);
+    item.innerHTML = `
+      <div class="episode-num">第${ep.num}話</div>
+      <div class="episode-title">${ep.title || '（タイトルなし）'}</div>
+      <div class="episode-progress-wrap">
+        ${ep.completed
+          ? `<span class="episode-done-badge">完成</span>`
+          : `<div class="episode-bar-track"><div class="episode-bar-fill" style="width:${pct}%"></div></div>
+             <span class="episode-pct">${pct}%</span>`}
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+// ===== 話エディタ =====
+function openEpisodeEditor(epId) {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  const ep = ch.episodes.find(e => e.id === epId);
+  if (!ep) return;
+  currentEpisodeId = epId;
+
+  document.getElementById('episodeBadge').textContent  = `第${ep.num}話`;
+  document.getElementById('epEditorText').value        = ep.editorText || '';
+
+  document.getElementById('episodesView').style.display = 'none';
+  document.getElementById('chapterMeta').style.display  = 'none';
+  document.getElementById('episodeEditorView').classList.add('active');
+
+  updateEpCounts(ep.editorText || '', ep.targetChars);
+
+  if (ep.completed) { applyEpCompletedView(ep); } else { applyEpEditView(); }
+
+  document.getElementById('epEditorText').oninput = () => {
+    const text = document.getElementById('epEditorText').value;
+    const k = countKorean(text), j = countJapanese(text), t = k + j;
+    if (t > 0 && k > j) ep.targetChars = t;
+    updateEpCounts(text, ep.targetChars);
+  };
+}
+
+function backToEpisodeList() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  currentEpisodeId = null;
+  showEpisodesView(ch);
+}
+
+function updateEpCounts(text, targetChars) {
+  const k = countKorean(text), j = countJapanese(text), t = k + j;
+  document.getElementById('epKoreanCount').textContent   = k.toLocaleString() + ' 字';
+  document.getElementById('epJapaneseCount').textContent = j.toLocaleString() + ' 字';
+  const target = targetChars || t || 0;
+  document.getElementById('epTargetChars').textContent     = target > 0 ? target.toLocaleString() + ' 字' : '— 字';
+  document.getElementById('epTranslatedCount').textContent = j.toLocaleString() + ' 字';
+  const pct = target > 0 ? Math.min(100, Math.round(j / target * 100)) : 0;
+  document.getElementById('epProgressFill').style.width = pct + '%';
+  document.getElementById('epPctText').textContent      = pct + '%';
+}
+
+function applyEpEditView() {
+  document.getElementById('epEditorText').classList.remove('hidden');
+  document.getElementById('epFinishedView').classList.remove('active');
+  document.getElementById('epEditorCounts').style.display = '';
+  document.getElementById('epEditorLangLabel').textContent = '원문을 붙여넣고, 위에 번역문을 덮어쓰세요';
+  document.getElementById('epSaveBtn').style.display    = '';
+  document.getElementById('epCompleteBtn').style.display = '';
+  document.getElementById('epEditModeBtn').style.display = 'none';
+  document.getElementById('episodeMeta').style.display   = '';
+  document.getElementById('epPageNav').style.display     = 'none';
+}
+
+function applyEpCompletedView(ep) {
+  document.getElementById('epEditorText').classList.add('hidden');
+  document.getElementById('epFinishedView').classList.add('active');
+  document.getElementById('epFinishedView').textContent    = ep.finishedText || ep.editorText || '';
+  document.getElementById('epEditorCounts').style.display  = 'none';
+  document.getElementById('epEditorLangLabel').textContent = '完成原稿 · 読み物モード';
+  document.getElementById('epSaveBtn').style.display    = 'none';
+  document.getElementById('epCompleteBtn').style.display = 'none';
+  document.getElementById('epEditModeBtn').style.display = '';
+  document.getElementById('episodeMeta').style.display   = 'none';
+  // ページめくりナビ表示
+  const nav = document.getElementById('epPageNav');
+  nav.style.display = 'flex';
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (ch) updateNavButtons(ch);
+}
+
+function saveEpisode() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  const ep = ch.episodes.find(e => e.id === currentEpisodeId);
+  if (!ep) return;
+  const text = document.getElementById('epEditorText').value;
+  const k = countKorean(text), j = countJapanese(text), t = k + j;
+  ep.editorText      = text;
+  if (t > 0 && k > j) ep.targetChars = t;
+  ep.translatedChars = j;
+  updateChapterMeta(ch);
+  touchStreak(j);
+  saveData(data);
+  renderShelves();
+  updateEpCounts(text, ep.targetChars);
+  showToast('保存しました ✓');
+}
+
+function markEpisodeComplete() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  const ep = ch.episodes.find(e => e.id === currentEpisodeId);
+  if (!ep) return;
+  const text = document.getElementById('epEditorText').value;
+  if (!text.trim()) return;
+  const k = countKorean(text), j = countJapanese(text), t = k + j;
+  ep.editorText      = text;
+  ep.finishedText    = text;
+  if (t > 0 && k > j) ep.targetChars = t;
+  ep.translatedChars = ep.targetChars;
+  ep.completed       = true;
+  updateChapterMeta(ch);
+  touchStreak(ep.translatedChars);
+  saveData(data);
+  renderShelves();
+  applyEpCompletedView(ep);
+}
+
+function switchEpisodeToEditMode() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  const ep = ch.episodes.find(e => e.id === currentEpisodeId);
+  if (!ep) return;
+  ep.completed = false;
+  saveData(data);
+  renderShelves();
+  applyEpEditView();
+}
+
+function touchStreak(chars) {
+  if (chars <= 0) return;
+  const today     = new Date().toDateString();
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (data.lastActivity !== today) {
+    data.streak = data.lastActivity === yesterday ? (data.streak||0)+1 : 1;
+    data.lastActivity = today;
+  }
+}
+
+// ===== 削除 =====
+function deleteChapter() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  // 削除確認なしで即実行（iOSのconfirmブロック対策）
+  data.chapters = data.chapters.filter(c => c.id !== currentChapterId);
+  saveData(data);
+  renderShelves();
+  closeChapterModal();
+  showToast(`第${ch.num}章を削除しました`);
+}
+
+function deleteEpisode() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  const ep = ch.episodes.find(e => e.id === currentEpisodeId);
+  if (!ep) return;
+  ch.episodes = ch.episodes.filter(e => e.id !== currentEpisodeId);
+  updateChapterMeta(ch);
+  saveData(data);
+  renderShelves();
+  showToast(`第${ep.num}話を削除しました`);
+  backToEpisodeList();
+}
+
+// ===== ページめくりナビ =====
+function navEpisode(dir) {
+  const ch  = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  const sorted = (ch.episodes || []).slice().sort((a,b) => a.num - b.num);
+  const idx    = sorted.findIndex(e => e.id === currentEpisodeId);
+  const next   = sorted[idx + dir];
+  if (next) openEpisodeEditor(next.id);
+}
+
+function updateNavButtons(ch) {
+  const sorted = (ch.episodes || []).slice().sort((a,b) => a.num - b.num);
+  const idx    = sorted.findIndex(e => e.id === currentEpisodeId);
+  const prev   = document.getElementById('epPrevBtn');
+  const next   = document.getElementById('epNextBtn');
+  if (prev) prev.disabled = idx <= 0;
+  if (next) next.disabled = idx >= sorted.length - 1;
+}
+function openAddEpisodeModal() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  const eps  = ch.episodes || [];
+  const next = eps.length > 0 ? Math.max(...eps.map(e=>e.num)) + 1 : 1;
+  document.getElementById('newEpisodeNum').value = next;
+  document.getElementById('addEpisodeModal').classList.add('open');
+}
+function closeAddEpisodeModal() { document.getElementById('addEpisodeModal').classList.remove('open'); }
+
+function addEpisode() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch || !ch.episodes) return;
+  const num = parseInt(document.getElementById('newEpisodeNum').value);
+  if (!num || num < 1) return;
+  if (ch.episodes.find(e => e.num === num)) {
+    showToast(`第${num}話はすでに存在します`, 'error'); return;
+  }
+  ch.episodes.push({ id: Date.now() + Math.random(), num, title:'', targetChars:0, translatedChars:0, editorText:'', completed:false });
+  saveData(data);
+  renderEpisodeList(ch);
+  updateChapterMeta(ch);
+  closeAddEpisodeModal();
+}
+
+function openBulkAddEpisodeModal() {
+  const ch = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  const eps  = ch.episodes || [];
+  const next = eps.length > 0 ? Math.max(...eps.map(e=>e.num)) + 1 : 1;
+  document.getElementById('bulkEpStart').value = next;
+  document.getElementById('bulkEpEnd').value   = next + 4;
+  document.getElementById('bulkEpisodeModal').classList.add('open');
+}
+function closeBulkEpisodeModal() { document.getElementById('bulkEpisodeModal').classList.remove('open'); }
+
+function bulkAddEpisodes() {
+  const ch    = data.chapters.find(c => c.id === currentChapterId);
+  if (!ch) return;
+  if (!ch.episodes) ch.episodes = [];
+  const start = parseInt(document.getElementById('bulkEpStart').value);
+  const end   = parseInt(document.getElementById('bulkEpEnd').value);
+  if (!start || !end || start > end) return;
+  if (end - start > 100) { showToast('一度に追加できるのは100話までです', 'error'); return; }
+  for (let i = start; i <= end; i++) {
+    if (!ch.episodes.find(e => e.num === i))
+      ch.episodes.push({ id: Date.now() + Math.random() + i, num:i, title:'', targetChars:0, translatedChars:0, editorText:'', completed:false });
+  }
+  saveData(data);
+  renderEpisodeList(ch);
+  updateChapterMeta(ch);
+  closeBulkEpisodeModal();
 }
 
 // ===== ADD =====
@@ -1223,12 +1638,14 @@ function bulkAddChapters() {
 }
 
 // ===== CLOSE ON OUTSIDE CLICK =====
-['chapterModal','addModal','bulkModal'].forEach(id => {
+['chapterModal','addModal','bulkModal','addEpisodeModal','bulkEpisodeModal'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) {
     if (e.target === this) {
       if (id === 'chapterModal') closeChapterModal();
       else if (id === 'addModal') closeAddModal();
-      else closeBulkModal();
+      else if (id === 'bulkModal') closeBulkModal();
+      else if (id === 'addEpisodeModal') closeAddEpisodeModal();
+      else closeBulkEpisodeModal();
     }
   });
 });
