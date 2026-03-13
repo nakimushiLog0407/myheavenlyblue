@@ -1357,7 +1357,6 @@ function renderEpisodeList(ch) {
     item.onclick = () => openEpisodeEditor(ep.id);
     item.innerHTML = `
       <div class="episode-num">第${ep.num}話</div>
-      <div class="episode-title">${ep.title || '（タイトルなし）'}</div>
       <div class="episode-progress-wrap">
         ${ep.completed
           ? `<span class="episode-done-badge">完成</span>`
