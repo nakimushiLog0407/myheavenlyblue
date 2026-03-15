@@ -860,6 +860,101 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  /* ===== 置換辞書モーダル ===== */
+  .dict-modal {
+    background: var(--white);
+    border-radius: 24px;
+    width: min(680px, 96vw);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(180,140,120,0.22);
+    animation: fadeUp 0.25s ease both;
+    overflow: hidden;
+  }
+  .dict-modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(180,140,120,0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .dict-modal-title { font-size: 0.95rem; font-weight: 500; color: var(--ink); flex: 1; }
+  .dict-modal-body {
+    flex: 1; overflow-y: auto; padding: 16px 24px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .dict-add-row {
+    display: grid; grid-template-columns: 1fr auto 1fr auto;
+    gap: 8px; align-items: center;
+    background: var(--bg2); border-radius: 14px; padding: 12px 14px;
+  }
+  .dict-arrow { color: var(--ink-light); font-size: 0.9rem; text-align: center; }
+  .dict-input {
+    width: 100%; padding: 8px 12px;
+    border: 1px solid rgba(180,140,120,0.3); border-radius: 10px;
+    font-family: 'Zen Maru Gothic', sans-serif; font-size: 16px;
+    color: var(--ink); outline: none; background: var(--white);
+    transition: border-color 0.2s; min-width: 0;
+  }
+  .dict-input:focus { border-color: var(--pink-deep); }
+  .dict-list { display: flex; flex-direction: column; gap: 6px; }
+  .dict-list-header {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.62rem; letter-spacing: 0.1em; color: var(--ink-light);
+    padding: 0 4px; margin-bottom: 2px;
+  }
+  .dict-item {
+    display: grid; grid-template-columns: 1fr auto 1fr auto;
+    gap: 8px; align-items: center;
+    background: var(--white); border: 1px solid rgba(180,140,120,0.15);
+    border-radius: 12px; padding: 10px 14px; transition: border-color 0.18s;
+  }
+  .dict-item:hover { border-color: var(--pink); }
+  .dict-item-from { font-size: 0.8rem; color: var(--ink); word-break: break-all; }
+  .dict-item-to   { font-size: 0.8rem; color: var(--lavender-deep); word-break: break-all; }
+  .dict-item-del {
+    background: none; border: none; cursor: pointer; color: var(--ink-light);
+    padding: 2px 6px; border-radius: 6px; transition: color 0.18s; font-size: 0.8rem;
+  }
+  .dict-item-del:hover { color: #c0604a; }
+  .dict-empty { text-align: center; color: var(--ink-light); font-size: 0.75rem; padding: 24px 0; }
+  .dict-modal-footer {
+    padding: 14px 24px; border-top: 1px solid rgba(180,140,120,0.12);
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0; flex-wrap: wrap;
+  }
+  .dict-run-info { font-size: 0.65rem; color: var(--ink-light); flex: 1; }
+
+  /* ===== 全話完成のキラキラ ===== */
+  .book-spine.all-done {
+    box-shadow: 2px 0 12px rgba(180,140,120,0.45), inset -2px 0 4px rgba(0,0,0,0.06), inset 0 0 14px rgba(255,255,255,0.2);
+  }
+  .sparkle-wrap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding-top: 3px;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .sparkle {
+    font-size: 0.38rem;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 0 4px rgba(255,255,255,0.9), 0 0 8px rgba(255,220,180,0.7);
+    animation: sparkleAnim 2s ease-in-out infinite;
+  }
+  .sparkle.s1 { animation-delay: 0s;    font-size: 0.42rem; }
+  .sparkle.s2 { animation-delay: 0.7s;  font-size: 0.3rem; }
+  .sparkle.s3 { animation-delay: 1.4s;  font-size: 0.38rem; }
+  @keyframes sparkleAnim {
+    0%, 100% { opacity: 0.4; transform: scale(0.9) translateY(0px); }
+    50%       { opacity: 1;   transform: scale(1.2) translateY(-1px); }
+  }
+
   /* ===== SCROLLBAR ===== */
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -920,6 +1015,7 @@
   <div class="controls">
     <button class="btn btn-primary" onclick="openAddModal()" style="display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 章を追加</button>
     <button class="btn btn-secondary" onclick="openBulkAddModal()" style="display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="9" y="7" width="4" height="14" rx="1"/><rect x="15" y="5" width="4" height="16" rx="1"/><line x1="2" y1="21" x2="22" y2="21"/></svg> まとめて追加</button>
+    <button class="btn btn-secondary" onclick="openDictModal()" style="display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg> 置換辞書</button>
     <button class="btn btn-secondary" onclick="exportData()" style="margin-left:auto;display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> エクスポート</button>
     <button class="btn btn-secondary" onclick="document.getElementById('importInput').click()" style="display:flex;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> インポート</button>
     <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(event)" />
@@ -934,6 +1030,42 @@
     <div class="badges-row" id="badgesRow"></div>
   </div>
 
+</div>
+
+<!-- ===== DICT MODAL ===== -->
+<div class="modal-overlay" id="dictModal">
+  <div class="dict-modal">
+    <div class="dict-modal-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--lavender-deep);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <div class="dict-modal-title">置換辞書</div>
+      <button class="modal-close-btn" onclick="closeDictModal()">✕</button>
+    </div>
+    <div class="dict-modal-body">
+      <!-- 追加フォーム -->
+      <div class="dict-add-row">
+        <input class="dict-input" id="dictFrom" placeholder="韓国語（置換前）" />
+        <div class="dict-arrow">→</div>
+        <input class="dict-input" id="dictTo" placeholder="日本語（置換後）" />
+        <button class="btn btn-primary" onclick="addDictEntry()" style="white-space:nowrap;font-size:0.7rem;padding:6px 14px;">追加</button>
+      </div>
+      <!-- 登録済みリスト -->
+      <div class="dict-list">
+        <div class="dict-list-header">
+          <span>登録済みルール</span>
+          <span id="dictCount">0 件</span>
+        </div>
+        <div id="dictEntries"></div>
+      </div>
+    </div>
+    <div class="dict-modal-footer">
+      <div class="dict-run-info">全章・全話の未完成テキストに一括適用します。完成済みの話は対象外です。</div>
+      <button class="btn btn-secondary" onclick="closeDictModal()">閉じる</button>
+      <button class="btn btn-primary" onclick="runReplaceAll()" style="display:flex;align-items:center;gap:5px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        全話に置換を実行
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- ===== CHAPTER MODAL ===== -->
@@ -1206,18 +1338,27 @@ function renderShelves() {
       book.className = 'book';
       book.onclick = () => openChapterModal(ch.id);
 
+      // 全話完成判定（話が1つ以上あり、すべて completed）
+      const eps = ch.episodes || [];
+      const allDone = eps.length > 0 && eps.every(e => e.completed);
+
       book.innerHTML = `
-        <div class="book-spine${ch.completed ? ' completed' : ''}" style="width:${width}px;height:${height}px;background:${color.base};">
+        <div class="book-spine${allDone ? ' all-done' : ''}" style="width:${width}px;height:${height}px;background:${color.base};">
           <div class="book-fill" style="height:${pct}%;background:${color.fill};"></div>
           <div class="book-label">
             <div class="book-title-text">${titleShort}</div>
             <div class="book-num">${ch.num}</div>
           </div>
+          ${allDone ? `<div class="sparkle-wrap">
+            <span class="sparkle s1">✦</span>
+            <span class="sparkle s2">·</span>
+            <span class="sparkle s3">✦</span>
+          </div>` : ''}
         </div>
         <div class="book-tooltip">
-          <div class="tooltip-title">${ch.title || `第${ch.num}章`}${ch.completed ? ' ✦' : ''}</div>
+          <div class="tooltip-title">${ch.title || `第${ch.num}章`}${allDone ? ' ✦' : ''}</div>
           <div>${ch.translatedChars.toLocaleString()} / ${ch.targetChars.toLocaleString()} 字</div>
-          <div class="tooltip-pct">${ch.completed ? '翻訳完成' : pct + '% 完了'}</div>
+          <div class="tooltip-pct">${allDone ? '全話完成 ✦' : pct + '% 完了'}</div>
         </div>
       `;
       booksRow.appendChild(book);
@@ -1637,14 +1778,15 @@ function bulkAddChapters() {
 }
 
 // ===== CLOSE ON OUTSIDE CLICK =====
-['chapterModal','addModal','bulkModal','addEpisodeModal','bulkEpisodeModal'].forEach(id => {
+['chapterModal','addModal','bulkModal','addEpisodeModal','bulkEpisodeModal','dictModal'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) {
     if (e.target === this) {
       if (id === 'chapterModal') closeChapterModal();
       else if (id === 'addModal') closeAddModal();
       else if (id === 'bulkModal') closeBulkModal();
       else if (id === 'addEpisodeModal') closeAddEpisodeModal();
-      else closeBulkEpisodeModal();
+      else if (id === 'bulkEpisodeModal') closeBulkEpisodeModal();
+      else closeDictModal();
     }
   });
 });
@@ -1686,6 +1828,93 @@ function importData(event) {
     event.target.value = '';
   };
   reader.readAsText(file);
+}
+
+// ===== REPLACE DICT =====
+const DICT_KEY = 'translationDict_v1';
+function loadDict() {
+  try { return JSON.parse(localStorage.getItem(DICT_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveDict(d) { localStorage.setItem(DICT_KEY, JSON.stringify(d)); }
+let dict = loadDict();
+
+function openDictModal() {
+  renderDictEntries();
+  document.getElementById('dictFrom').value = '';
+  document.getElementById('dictTo').value   = '';
+  document.getElementById('dictModal').classList.add('open');
+}
+function closeDictModal() { document.getElementById('dictModal').classList.remove('open'); }
+
+function addDictEntry() {
+  const from = document.getElementById('dictFrom').value.trim();
+  const to   = document.getElementById('dictTo').value.trim();
+  if (!from || !to) { showToast('韓国語と日本語の両方を入力してください', 'error'); return; }
+  if (dict.find(e => e.from === from)) { showToast('同じ置換前テキストがすでに登録されています', 'error'); return; }
+  dict.push({ id: Date.now(), from, to });
+  saveDict(dict);
+  renderDictEntries();
+  document.getElementById('dictFrom').value = '';
+  document.getElementById('dictTo').value   = '';
+}
+
+function deleteDictEntry(id) {
+  dict = dict.filter(e => e.id !== id);
+  saveDict(dict);
+  renderDictEntries();
+}
+
+function renderDictEntries() {
+  const container = document.getElementById('dictEntries');
+  document.getElementById('dictCount').textContent = dict.length + ' 件';
+  if (dict.length === 0) {
+    container.innerHTML = '<div class="dict-empty">まだ登録されていません。<br>上のフォームからルールを追加してください。</div>';
+    return;
+  }
+  container.innerHTML = '';
+  dict.forEach(e => {
+    const item = document.createElement('div');
+    item.className = 'dict-item';
+    item.innerHTML = `
+      <div class="dict-item-from">${escHtml(e.from)}</div>
+      <div class="dict-arrow">→</div>
+      <div class="dict-item-to">${escHtml(e.to)}</div>
+      <button class="dict-item-del" onclick="deleteDictEntry(${e.id})" title="削除">✕</button>`;
+    container.appendChild(item);
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function runReplaceAll() {
+  if (dict.length === 0) { showToast('置換ルールが登録されていません', 'error'); return; }
+  let totalReplaced = 0;
+  data.chapters.forEach(ch => {
+    (ch.episodes || []).forEach(ep => {
+      if (ep.completed) return; // 完成済みは対象外
+      if (!ep.editorText) return;
+      let text = ep.editorText;
+      dict.forEach(rule => {
+        const regex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+        const before = text;
+        text = text.replace(regex, rule.to);
+        if (text !== before) totalReplaced++;
+      });
+      ep.editorText = text;
+      // 翻訳済み文字数を再計算
+      ep.translatedChars = countJapanese(text);
+    });
+    // 章の集計を更新
+    ch.translatedChars = (ch.episodes||[]).reduce((s,e) => s + (e.translatedChars||0), 0);
+    ch.targetChars     = (ch.episodes||[]).reduce((s,e) => s + (e.targetChars||0), 0);
+  });
+  saveData(data);
+  renderShelves();
+  closeDictModal();
+  showToast(totalReplaced > 0 ? `${totalReplaced} 箇所を置換しました ✓` : '置換対象が見つかりませんでした');
 }
 
 // ===== TOAST =====
