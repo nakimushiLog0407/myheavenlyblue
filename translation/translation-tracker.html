@@ -2228,7 +2228,11 @@ function loadDict() {
   catch(e) { return []; }
 }
 function saveDict(d) { localStorage.setItem(DICT_KEY, JSON.stringify(d)); }
+function sortDict() {
+  dict.sort((a, b) => b.from.length - a.from.length);
+}
 let dict = loadDict();
+sortDict();
 
 function openDictModal() {
   renderDictEntries();
@@ -2244,6 +2248,7 @@ function addDictEntry() {
   if (!from || !to) { showToast('韓国語と日本語の両方を入力してください', 'error'); return; }
   if (dict.find(e => e.from === from)) { showToast('同じ置換前テキストがすでに登録されています', 'error'); return; }
   dict.push({ id: Date.now(), from, to });
+  sortDict();
   saveDict(dict);
   renderDictEntries();
   document.getElementById('dictFrom').value = '';
@@ -2252,6 +2257,7 @@ function addDictEntry() {
 
 function deleteDictEntry(id) {
   dict = dict.filter(e => e.id !== id);
+  sortDict();
   saveDict(dict);
   renderDictEntries();
 }
@@ -2285,9 +2291,10 @@ function runReplaceAll() {
   let totalReplaced = 0;
   data.chapters.forEach(ch => {
     (ch.episodes || []).forEach(ep => {
-      if (ep.completed) return; // 完成済みは対象外
+      if (ep.completed) return;
       if (!ep.editorText) return;
       let text = ep.editorText;
+      // 辞書順（文字数降順）のまま上から適用
       dict.forEach(rule => {
         const regex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
         const before = text;
@@ -2295,10 +2302,8 @@ function runReplaceAll() {
         if (text !== before) totalReplaced++;
       });
       ep.editorText = text;
-      // 翻訳済み文字数を再計算
       ep.translatedChars = countJapanese(text);
     });
-    // 章の集計を更新
     ch.translatedChars = (ch.episodes||[]).reduce((s,e) => s + (e.translatedChars||0), 0);
     ch.targetChars     = (ch.episodes||[]).reduce((s,e) => s + (e.targetChars||0), 0);
   });
