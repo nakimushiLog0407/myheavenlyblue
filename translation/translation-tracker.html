@@ -1124,6 +1124,67 @@
     font-size: 0.75rem; padding: 40px 20px; line-height: 2;
   }
 
+  /* ===== 含む表現パネル ===== */
+  .phrases-overlay {
+    position: absolute; inset: 0;
+    background: var(--white);
+    border-radius: 24px;
+    display: flex; flex-direction: column;
+    z-index: 10;
+    animation: fadeUp 0.2s ease both;
+  }
+  .phrases-header {
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid rgba(180,140,120,0.12);
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .phrases-keyword {
+    font-size: 0.95rem; font-weight: 500; color: var(--ink); flex: 1;
+  }
+  .phrases-keyword span {
+    color: var(--lavender-deep);
+  }
+  .phrases-list {
+    flex: 1; overflow-y: auto;
+    padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .phrase-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto;
+    gap: 8px; align-items: center;
+    background: var(--bg2);
+    border-radius: 12px; padding: 10px 12px;
+  }
+  .phrase-from {
+    font-size: 0.82rem; color: var(--ink); word-break: break-all;
+  }
+  .phrase-from mark {
+    background: #fce9c0; color: var(--ink);
+    border-radius: 3px; padding: 0 2px;
+  }
+  .phrase-to-input {
+    width: 100%; border: 1px solid rgba(180,140,120,0.3);
+    border-radius: 8px; padding: 6px 10px;
+    font-family: 'Zen Maru Gothic', sans-serif; font-size: 16px;
+    color: var(--ink); background: var(--white); outline: none;
+    transition: border-color 0.2s; min-width: 0;
+  }
+  .phrase-to-input:focus { border-color: var(--pink-deep); }
+  .phrase-reg-btn {
+    font-size: 0.6rem; padding: 4px 10px; white-space: nowrap;
+    border: 1px solid rgba(180,140,120,0.3); border-radius: 10px;
+    background: var(--white); color: var(--ink-mid);
+    cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+  }
+  .phrase-reg-btn:hover { background: var(--mint); border-color: var(--mint-deep); }
+  .phrase-reg-btn.done { background: var(--mint); border-color: var(--mint-deep); color: var(--ink-mid); opacity: 0.7; cursor: default; }
+  .phrases-footer {
+    padding: 12px 18px;
+    border-top: 1px solid rgba(180,140,120,0.1);
+    display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0;
+  }
+
   /* ===== SCROLLBAR ===== */
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -1205,7 +1266,7 @@
 
 <!-- ===== FREQ MODAL ===== -->
 <div class="modal-overlay" id="freqModal">
-  <div class="freq-modal">
+  <div class="freq-modal" style="position:relative;">
     <div class="freq-modal-header">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--lavender-deep);flex-shrink:0"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       <div class="freq-modal-title">頻出韓国語単語</div>
@@ -1229,6 +1290,20 @@
       <span class="freq-info" id="freqInfo"></span>
     </div>
     <div class="freq-list" id="freqList"></div>
+
+    <!-- 含む表現パネル（オーバーレイ） -->
+    <div class="phrases-overlay" id="phrasesPanel" style="display:none;">
+      <div class="phrases-header">
+        <button class="ep-back-btn" onclick="closePhrasesPanel()">← 戻る</button>
+        <div class="phrases-keyword" id="phrasesKeyword"></div>
+        <button class="modal-close-btn" onclick="closeFreqModal()">✕</button>
+      </div>
+      <div class="phrases-list" id="phrasesList"></div>
+      <div class="phrases-footer">
+        <button class="btn btn-secondary" onclick="closePhrasesPanel()">閉じる</button>
+        <button class="btn btn-primary" onclick="bulkRegisterPhrases()">一括登録</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2056,17 +2131,18 @@ let freqMap = {};
 function openFreqModal() {
   buildFreqMap();
   renderFreqList();
+  closePhrasesPanel();
   document.getElementById('freqModal').classList.add('open');
 }
-function closeFreqModal() { document.getElementById('freqModal').classList.remove('open'); }
+function closeFreqModal() {
+  document.getElementById('freqModal').classList.remove('open');
+  closePhrasesPanel();
+}
 
 function buildFreqMap() {
   freqMap = {};
-  // ハングル文字の正規表現（音節単位）
   const koreanWordRe = /[\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F]+/g;
-  // 1〜2文字の超短い語は助詞・語尾の可能性が高いので除外（3文字以上を対象）
   const minLen = 2;
-
   data.chapters.forEach(ch => {
     (ch.episodes || []).forEach(ep => {
       const text = ep.editorText || '';
@@ -2102,19 +2178,18 @@ function renderFreqList() {
   listEl.innerHTML = '';
 
   sorted.forEach(([word, count], i) => {
-    const pct  = Math.round(count / maxCount * 100);
-    // 置換辞書に登録済みかチェック
+    const pct    = Math.round(count / maxCount * 100);
     const inDict = dict.some(e => e.from === word);
 
     const item = document.createElement('div');
     item.className = 'freq-item';
     item.innerHTML = `
       <div class="freq-rank">${i + 1}</div>
-      <div class="freq-word">${escHtml(word)}</div>
+      <div class="freq-word" style="cursor:pointer;">${escHtml(word)}</div>
       <div class="freq-bar-wrap"><div class="freq-bar-fill" style="width:${pct}%"></div></div>
       <div class="freq-count">${count}</div>
-      <button class="freq-add-btn" onclick="freqAddToDict('${escHtml(word)}')" ${inDict ? 'disabled style="opacity:0.4;"' : ''}>
-        ${inDict ? '登録済み' : '辞書へ'}
+      <button class="freq-add-btn" id="freqBtn_${i}" onclick="openPhrasesPanel('${escHtml(word)}', ${i})">
+        含む表現
       </button>
     `;
     // 単語クリックで検索モーダルへ
@@ -2129,8 +2204,110 @@ function renderFreqList() {
   });
 }
 
+// ===== 含む表現パネル =====
+let currentPhraseWord = '';
+
+function openPhrasesPanel(word, btnIdx) {
+  currentPhraseWord = word;
+
+  // キーワードを含む全ハングル連続表現を本文から抽出
+  const koreanWordRe = /[\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F]+/g;
+  const phraseCount  = {};
+
+  data.chapters.forEach(ch => {
+    (ch.episodes || []).forEach(ep => {
+      const text  = ep.editorText || '';
+      const words = text.match(koreanWordRe) || [];
+      words.forEach(w => {
+        if (w.includes(word)) phraseCount[w] = (phraseCount[w] || 0) + 1;
+      });
+    });
+  });
+
+  // 出現回数降順、同数なら文字数降順
+  const phrases = Object.entries(phraseCount)
+    .sort((a, b) => b[1] - a[1] || b[0].length - a[0].length);
+
+  const panel    = document.getElementById('phrasesPanel');
+  const listEl   = document.getElementById('phrasesList');
+  const titleEl  = document.getElementById('phrasesKeyword');
+
+  titleEl.innerHTML = `「<span>${escHtml(word)}</span>」を含む表現`;
+  listEl.innerHTML  = '';
+
+  if (phrases.length === 0) {
+    listEl.innerHTML = '<div class="freq-empty">該当する表現が見つかりませんでした</div>';
+  } else {
+    phrases.forEach(([phrase, count]) => {
+      const inDict   = dict.some(e => e.from === phrase);
+      const highlighted = escHtml(phrase).replace(
+        new RegExp(escHtml(word), 'g'),
+        m => `<mark>${m}</mark>`
+      );
+      const row = document.createElement('div');
+      row.className = 'phrase-row';
+      row.dataset.phrase = phrase;
+      row.innerHTML = `
+        <div class="phrase-from">${highlighted} <span style="font-size:0.58rem;color:var(--ink-light);">(${count}回)</span></div>
+        <div style="color:var(--ink-light);font-size:0.85rem;">→</div>
+        <input class="phrase-to-input" placeholder="日本語訳" value="${inDict ? escHtml(dict.find(e=>e.from===phrase).to) : ''}" data-from="${escHtml(phrase)}" />
+        <button class="phrase-reg-btn${inDict?' done':''}" data-from="${escHtml(phrase)}" onclick="registerSinglePhrase(this)">
+          ${inDict ? '登録済' : '登録'}
+        </button>
+      `;
+      listEl.appendChild(row);
+    });
+  }
+
+  panel.style.display = 'flex';
+  panel.style.flexDirection = 'column';
+}
+
+function closePhrasesPanel() {
+  document.getElementById('phrasesPanel').style.display = 'none';
+  currentPhraseWord = '';
+}
+
+function registerSinglePhrase(btn) {
+  const from  = btn.dataset.from;
+  const input = btn.closest('.phrase-row').querySelector('.phrase-to-input');
+  const to    = input.value;
+  if (!to.trim() && !to) { showToast('日本語訳を入力してください', 'error'); return; }
+  // 既存なら上書き、なければ追加
+  const existing = dict.find(e => e.from === from);
+  if (existing) { existing.to = to; }
+  else { dict.push({ id: Date.now() + Math.random(), from, to }); }
+  sortDict();
+  saveDict(dict);
+  btn.textContent = '登録済';
+  btn.classList.add('done');
+  showToast(`「${from}」を登録しました ✓`);
+}
+
+function bulkRegisterPhrases() {
+  const rows = document.querySelectorAll('#phrasesList .phrase-row');
+  let count  = 0;
+  rows.forEach(row => {
+    const from  = row.dataset.phrase;
+    const input = row.querySelector('.phrase-to-input');
+    const to    = input.value;
+    if (!to && !to.trim()) return; // 空欄はスキップ
+    const existing = dict.find(e => e.from === from);
+    if (existing) { existing.to = to; }
+    else { dict.push({ id: Date.now() + Math.random(), from, to }); count++; }
+  });
+  sortDict();
+  saveDict(dict);
+  // ボタンを全部「登録済」に
+  document.querySelectorAll('#phrasesList .phrase-reg-btn').forEach(btn => {
+    const row = btn.closest('.phrase-row');
+    const inp = row.querySelector('.phrase-to-input');
+    if (inp.value) { btn.textContent = '登録済'; btn.classList.add('done'); }
+  });
+  showToast(count > 0 ? `${count} 件を辞書に追加しました ✓` : '更新しました ✓');
+}
+
 function freqAddToDict(word) {
-  // 置換辞書モーダルを開いて検索語をセット
   closeFreqModal();
   openDictModal();
   document.getElementById('dictFrom').value = word;
