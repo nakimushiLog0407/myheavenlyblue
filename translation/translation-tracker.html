@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
 <title>翻訳の本棚</title>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;500&family=Noto+Sans+KR:wght@300;400&family=DM+Serif+Display:ital@1&display=swap" rel="stylesheet">
 <style>
   :root {
+    color-scheme: light only;
     --bg: #fdf8f4;
     --bg2: #fef3ec;
     --white: #ffffff;
@@ -2243,8 +2245,8 @@ function openDictModal() {
 function closeDictModal() { document.getElementById('dictModal').classList.remove('open'); }
 
 function addDictEntry() {
-  const from = document.getElementById('dictFrom').value.trim();
-  const to   = document.getElementById('dictTo').value.trim();
+  const from = document.getElementById('dictFrom').value;
+  const to   = document.getElementById('dictTo').value;
   if (!from || !to) { showToast('韓国語と日本語の両方を入力してください', 'error'); return; }
   if (dict.find(e => e.from === from)) { showToast('同じ置換前テキストがすでに登録されています', 'error'); return; }
   dict.push({ id: Date.now(), from, to });
