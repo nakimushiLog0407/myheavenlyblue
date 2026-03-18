@@ -2142,7 +2142,7 @@ function closeFreqModal() {
 function buildFreqMap() {
   freqMap = {};
   const koreanWordRe = /[\uAC00-\uD7A3\u1100-\u11FF\u3130-\u318F]+/g;
-  const minLen = 2;
+  const minLen = 1;
   data.chapters.forEach(ch => {
     (ch.episodes || []).forEach(ep => {
       const text = ep.editorText || '';
