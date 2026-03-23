@@ -1352,6 +1352,14 @@
       </select>
       <span class="freq-info" id="freqInfo"></span>
     </div>
+    <div style="padding:0 16px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--ink-light);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="freqSearch" placeholder="単語を検索…" oninput="renderFreqList()"
+        style="flex:1;border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;font-family:inherit;font-size:0.78rem;color:var(--ink);background:var(--bg);outline:none;"
+        onfocus="this.style.borderColor='var(--lavender-deep)'" onblur="this.style.borderColor='var(--border)'"/>
+      <button onclick="document.getElementById('freqSearch').value='';renderFreqList();"
+        style="background:none;border:none;color:var(--ink-light);cursor:pointer;font-size:0.8rem;padding:0 2px;line-height:1;">✕</button>
+    </div>
     <div class="freq-list" id="freqList"></div>
 
     <!-- 含む表現パネル（オーバーレイ） -->
@@ -2232,6 +2240,8 @@ let freqMap = {};
 
 function openFreqModal() {
   buildFreqMap();
+  const s = document.getElementById('freqSearch');
+  if (s) s.value = '';
   renderFreqList();
   closePhrasesPanel();
   document.getElementById('freqModal').classList.add('open');
@@ -2260,16 +2270,24 @@ function buildFreqMap() {
 function renderFreqList() {
   const limit    = parseInt(document.getElementById('freqLimit').value);
   const minCount = parseInt(document.getElementById('freqMinCount').value);
+  const query    = (document.getElementById('freqSearch')?.value || '').trim();
   const listEl   = document.getElementById('freqList');
   const infoEl   = document.getElementById('freqInfo');
 
-  const sorted = Object.entries(freqMap)
-    .filter(([, count]) => count >= minCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit);
+  let entries = Object.entries(freqMap)
+    .filter(([, count]) => count >= minCount);
 
-  const total = Object.entries(freqMap).filter(([, c]) => c >= minCount).length;
-  infoEl.textContent = `全 ${total.toLocaleString()} 語`;
+  // 検索フィルター
+  if (query) {
+    entries = entries.filter(([word]) => word.includes(query));
+  }
+
+  const total = entries.length;
+  const sorted = entries.sort((a, b) => b[1] - a[1]).slice(0, limit);
+
+  infoEl.textContent = query
+    ? `「${query}」 ${total.toLocaleString()} 語`
+    : `全 ${total.toLocaleString()} 語`;
 
   if (sorted.length === 0) {
     listEl.innerHTML = '<div class="freq-empty">テキストがありません。<br>話にテキストを貼り付けると単語が表示されます。</div>';
