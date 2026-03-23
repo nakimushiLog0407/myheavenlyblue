@@ -911,7 +911,16 @@
   .align-preview-arrow { color: var(--ink-light); font-size: 0.85rem; flex-shrink: 0; }
   .align-preview-to {
     flex: 1; font-size: 0.8rem; color: var(--lavender-deep);
-    word-break: break-all;
+    word-break: break-all; outline: none;
+    border-bottom: 1.5px dashed var(--lavender-deep);
+    min-height: 1.2em; padding-bottom: 1px;
+  }
+  .align-preview-to:empty::before {
+    content: '日本語を選択 or ここに直接入力';
+    color: var(--ink-light); font-size: 0.72rem;
+  }
+  .align-preview-to:focus {
+    border-bottom-color: var(--pink-deep);
   }
   .align-preview-empty { color: var(--ink-light); font-size: 0.72rem; }
   .align-register-btn {
@@ -1424,7 +1433,9 @@
         </div>
         <!-- プレビュー -->
         <div class="align-preview" id="alignPreview">
-          <span class="align-preview-empty">← 両方のテキストを選択するとここに表示されます</span>
+          <div class="align-preview-from" id="alignPreviewFrom"><span class="align-preview-empty">← 韓国語を選択</span></div>
+          <div class="align-preview-arrow">→</div>
+          <div class="align-preview-to" id="alignPreviewTo" contenteditable="true" oninput="onAlignToEdit()" placeholder="日本語を選択 or ここに直接入力"></div>
         </div>
         <button class="btn btn-primary align-register-btn" id="alignRegisterBtn" disabled onclick="registerAlignPair()">辞書に登録</button>
       </div>
@@ -2523,42 +2534,48 @@ function switchDictTab(n) {
 }
 
 // 対訳選択の状態
+
+// 対訳選択の状態
 let alignSel = { src: '', dst: '' };
 
 function onAlignSelect(side) {
   const ta = document.getElementById(side==='src' ? 'alignSrc' : 'alignDst');
   const sel = ta.value.substring(ta.selectionStart, ta.selectionEnd).trim();
-  if (sel) {
-    alignSel[side] = sel;
-    ta.classList.add('has-selection');
+  if (!sel) return;
+  alignSel[side] = sel;
+  ta.classList.add('has-selection');
+  if (side==='dst') {
+    document.getElementById('alignPreviewTo').textContent = sel;
   }
   updateAlignPreview();
 }
 
+function onAlignToEdit() {
+  alignSel.dst = document.getElementById('alignPreviewTo').textContent.trim();
+  updateAlignBtn();
+}
+
 function updateAlignPreview() {
-  const preview = document.getElementById('alignPreview');
-  const btn = document.getElementById('alignRegisterBtn');
-  const { src, dst } = alignSel;
-  if (src && dst) {
-    preview.innerHTML = `
-      <div class="align-preview-from">${escHtml(src)}</div>
-      <div class="align-preview-arrow">→</div>
-      <div class="align-preview-to">${escHtml(dst)}</div>`;
-    btn.disabled = false;
-  } else if (src || dst) {
-    preview.innerHTML = `
-      ${src ? `<div class="align-preview-from">${escHtml(src)}</div>` : '<div class="align-preview-empty">←韓国語を選択</div>'}
-      <div class="align-preview-arrow">→</div>
-      ${dst ? `<div class="align-preview-to">${escHtml(dst)}</div>` : '<div class="align-preview-empty">日本語を選択→</div>'}`;
-    btn.disabled = true;
+  const fromEl = document.getElementById('alignPreviewFrom');
+  const { src } = alignSel;
+  if (src) {
+    fromEl.textContent = src;
   } else {
-    preview.innerHTML = '<span class="align-preview-empty">← 両方のテキストを選択するとここに表示されます</span>';
-    btn.disabled = true;
+    fromEl.innerHTML = '<span class="align-preview-empty">← 韓国語を選択</span>';
   }
+  updateAlignBtn();
+}
+
+function updateAlignBtn() {
+  const src = alignSel.src;
+  const dst = document.getElementById('alignPreviewTo').textContent.trim();
+  alignSel.dst = dst;
+  document.getElementById('alignRegisterBtn').disabled = !(src && dst);
 }
 
 function registerAlignPair() {
-  const { src, dst } = alignSel;
+  const src = alignSel.src;
+  const dst = document.getElementById('alignPreviewTo').textContent.trim();
   if (!src || !dst) return;
   if (dict.find(e => e.from === src)) {
     showToast('「' + src + '」はすでに登録されています', 'error'); return;
@@ -2567,11 +2584,12 @@ function registerAlignPair() {
   sortDict();
   saveDict(dict);
   showToast('「' + src + ' → ' + dst + '」を登録しました！');
-  // リセット
   alignSel = { src: '', dst: '' };
   document.getElementById('alignSrc').classList.remove('has-selection');
   document.getElementById('alignDst').classList.remove('has-selection');
-  updateAlignPreview();
+  document.getElementById('alignPreviewFrom').innerHTML = '<span class="align-preview-empty">← 韓国語を選択</span>';
+  document.getElementById('alignPreviewTo').textContent = '';
+  updateAlignBtn();
 }
 
 function addDictEntry() {
