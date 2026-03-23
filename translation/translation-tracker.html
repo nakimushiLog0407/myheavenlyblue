@@ -862,7 +862,61 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ===== 置換辞書モーダル ===== */
+  /* ===== 対訳登録モード ===== */
+  .dict-tab-row {
+    display: flex; gap: 0; margin-bottom: 12px;
+    border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden;
+  }
+  .dict-tab {
+    flex: 1; padding: 7px; font-family: inherit; font-size: 0.72rem; font-weight: 500;
+    background: none; border: none; cursor: pointer; color: var(--ink-light);
+    transition: background 0.15s, color 0.15s;
+  }
+  .dict-tab.active { background: var(--lavender); color: var(--lavender-deep); font-weight: 700; }
+  .dict-tab-panel { display: none; }
+  .dict-tab-panel.active { display: block; }
+
+  /* 対訳パネル */
+  .align-pane {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;
+  }
+  .align-col-label {
+    font-size: 0.65rem; font-weight: 600; color: var(--ink-light);
+    letter-spacing: 0.08em; margin-bottom: 4px;
+  }
+  .align-textarea {
+    width: 100%; height: 140px; resize: none;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 8px; font-family: inherit; font-size: 0.78rem;
+    line-height: 1.7; color: var(--ink); background: var(--bg);
+    transition: border-color 0.15s;
+  }
+  .align-textarea:focus { outline: none; border-color: var(--lavender-deep); }
+  .align-textarea.has-selection { border-color: var(--pink-deep); background: #fff8fa; }
+  .align-hint {
+    font-size: 0.65rem; color: var(--ink-light); text-align: center;
+    padding: 6px; background: var(--lavender); border-radius: 6px;
+    margin-bottom: 8px; line-height: 1.6;
+  }
+  .align-preview {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; margin-bottom: 8px;
+    min-height: 40px;
+  }
+  .align-preview-from {
+    flex: 1; font-size: 0.8rem; color: var(--ink);
+    word-break: break-all;
+  }
+  .align-preview-arrow { color: var(--ink-light); font-size: 0.85rem; flex-shrink: 0; }
+  .align-preview-to {
+    flex: 1; font-size: 0.8rem; color: var(--lavender-deep);
+    word-break: break-all;
+  }
+  .align-preview-empty { color: var(--ink-light); font-size: 0.72rem; }
+  .align-register-btn {
+    width: 100%;
+  }
   .dict-modal {
     background: var(--white);
     border-radius: 24px;
@@ -1334,21 +1388,58 @@
       <button class="modal-close-btn" onclick="closeDictModal()">✕</button>
     </div>
     <div class="dict-modal-body">
-      <!-- 追加フォーム -->
-      <div class="dict-add-row">
-        <input class="dict-input" id="dictFrom" placeholder="韓国語（置換前）" />
-        <div class="dict-arrow">→</div>
-        <input class="dict-input" id="dictTo" placeholder="日本語（置換後）" />
-        <button class="btn btn-primary" onclick="addDictEntry()" style="white-space:nowrap;font-size:0.7rem;padding:6px 14px;">追加</button>
+
+      <!-- タブ切替 -->
+      <div class="dict-tab-row">
+        <button class="dict-tab active" id="dictTab1" onclick="switchDictTab(1)">手動で登録</button>
+        <button class="dict-tab" id="dictTab2" onclick="switchDictTab(2)">対訳から登録</button>
+        <button class="dict-tab" id="dictTab3" onclick="switchDictTab(3)">登録済み一覧</button>
       </div>
-      <!-- 登録済みリスト -->
-      <div class="dict-list">
-        <div class="dict-list-header">
-          <span>登録済みルール</span>
-          <span id="dictCount">0 件</span>
+
+      <!-- タブ1：手動登録 -->
+      <div class="dict-tab-panel active" id="dictPanel1">
+        <div class="dict-add-row">
+          <input class="dict-input" id="dictFrom" placeholder="韓国語（置換前）" />
+          <div class="dict-arrow">→</div>
+          <input class="dict-input" id="dictTo" placeholder="日本語（置換後）" />
+          <button class="btn btn-primary" onclick="addDictEntry()" style="white-space:nowrap;font-size:0.7rem;padding:6px 14px;">追加</button>
         </div>
-        <div id="dictEntries"></div>
       </div>
+
+      <!-- タブ2：対訳から登録 -->
+      <div class="dict-tab-panel" id="dictPanel2">
+        <div class="align-hint">
+          原文と訳文を貼り付けて、それぞれのテキストエリアで登録したい語句を<strong>ドラッグで選択</strong>してください。<br>
+          両方選択されたら「辞書に登録」ボタンが押せます。
+        </div>
+        <div class="align-pane">
+          <div>
+            <div class="align-col-label">原文（韓国語）</div>
+            <textarea class="align-textarea" id="alignSrc" placeholder="韓国語の原文をここに貼り付け…" onmouseup="onAlignSelect('src')" ontouchend="onAlignSelect('src')"></textarea>
+          </div>
+          <div>
+            <div class="align-col-label">訳文（日本語）</div>
+            <textarea class="align-textarea" id="alignDst" placeholder="日本語の訳文をここに貼り付け…" onmouseup="onAlignSelect('dst')" ontouchend="onAlignSelect('dst')"></textarea>
+          </div>
+        </div>
+        <!-- プレビュー -->
+        <div class="align-preview" id="alignPreview">
+          <span class="align-preview-empty">← 両方のテキストを選択するとここに表示されます</span>
+        </div>
+        <button class="btn btn-primary align-register-btn" id="alignRegisterBtn" disabled onclick="registerAlignPair()">辞書に登録</button>
+      </div>
+
+      <!-- タブ3：登録済み一覧 -->
+      <div class="dict-tab-panel" id="dictPanel3">
+        <div class="dict-list">
+          <div class="dict-list-header">
+            <span>登録済みルール</span>
+            <span id="dictCount">0 件</span>
+          </div>
+          <div id="dictEntries"></div>
+        </div>
+      </div>
+
     </div>
     <div class="dict-modal-footer">
       <div class="dict-run-info">全章・全話の未完成テキストに一括適用します。完成済みの話は対象外です。</div>
@@ -2417,9 +2508,71 @@ function openDictModal() {
   renderDictEntries();
   document.getElementById('dictFrom').value = '';
   document.getElementById('dictTo').value   = '';
+  switchDictTab(1);
   document.getElementById('dictModal').classList.add('open');
 }
 function closeDictModal() { document.getElementById('dictModal').classList.remove('open'); }
+
+// タブ切替
+function switchDictTab(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('dictTab'+i).classList.toggle('active', i===n);
+    document.getElementById('dictPanel'+i).classList.toggle('active', i===n);
+  });
+  if (n===3) renderDictEntries();
+}
+
+// 対訳選択の状態
+let alignSel = { src: '', dst: '' };
+
+function onAlignSelect(side) {
+  const ta = document.getElementById(side==='src' ? 'alignSrc' : 'alignDst');
+  const sel = ta.value.substring(ta.selectionStart, ta.selectionEnd).trim();
+  if (sel) {
+    alignSel[side] = sel;
+    ta.classList.add('has-selection');
+  }
+  updateAlignPreview();
+}
+
+function updateAlignPreview() {
+  const preview = document.getElementById('alignPreview');
+  const btn = document.getElementById('alignRegisterBtn');
+  const { src, dst } = alignSel;
+  if (src && dst) {
+    preview.innerHTML = `
+      <div class="align-preview-from">${escHtml(src)}</div>
+      <div class="align-preview-arrow">→</div>
+      <div class="align-preview-to">${escHtml(dst)}</div>`;
+    btn.disabled = false;
+  } else if (src || dst) {
+    preview.innerHTML = `
+      ${src ? `<div class="align-preview-from">${escHtml(src)}</div>` : '<div class="align-preview-empty">←韓国語を選択</div>'}
+      <div class="align-preview-arrow">→</div>
+      ${dst ? `<div class="align-preview-to">${escHtml(dst)}</div>` : '<div class="align-preview-empty">日本語を選択→</div>'}`;
+    btn.disabled = true;
+  } else {
+    preview.innerHTML = '<span class="align-preview-empty">← 両方のテキストを選択するとここに表示されます</span>';
+    btn.disabled = true;
+  }
+}
+
+function registerAlignPair() {
+  const { src, dst } = alignSel;
+  if (!src || !dst) return;
+  if (dict.find(e => e.from === src)) {
+    showToast('「' + src + '」はすでに登録されています', 'error'); return;
+  }
+  dict.push({ id: Date.now(), from: src, to: dst });
+  sortDict();
+  saveDict(dict);
+  showToast('「' + src + ' → ' + dst + '」を登録しました！');
+  // リセット
+  alignSel = { src: '', dst: '' };
+  document.getElementById('alignSrc').classList.remove('has-selection');
+  document.getElementById('alignDst').classList.remove('has-selection');
+  updateAlignPreview();
+}
 
 function addDictEntry() {
   const from = document.getElementById('dictFrom').value;
