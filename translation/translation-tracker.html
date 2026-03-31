@@ -2590,13 +2590,24 @@ function onAlignSelect(side) {
   alignSel[side] = sel;
   ta.classList.add('has-selection');
   if (side==='dst') {
-    document.getElementById('alignPreviewTo').textContent = sel;
+    const previewTo = document.getElementById('alignPreviewTo');
+    previewTo.textContent = sel;
+    alignSel.dst = sel;  // 明示的にセット
   }
   updateAlignPreview();
+  updateAlignBtn();  // 確実に再評価
+}
+
+// contenteditable からテキストを安全に取得
+function getEditableText(el) {
+  return (el.innerText || el.textContent || '')
+    .replace(/\u00A0/g, ' ')   // ノーブレークスペース→通常スペース
+    .replace(/\n/g, '')        // 改行除去
+    .trim();
 }
 
 function onAlignToEdit() {
-  alignSel.dst = document.getElementById('alignPreviewTo').textContent.trim();
+  alignSel.dst = getEditableText(document.getElementById('alignPreviewTo'));
   updateAlignBtn();
 }
 
@@ -2613,15 +2624,18 @@ function updateAlignPreview() {
 
 function updateAlignBtn() {
   const src = alignSel.src;
-  const dst = document.getElementById('alignPreviewTo').textContent.trim();
+  const dst = getEditableText(document.getElementById('alignPreviewTo'));
   alignSel.dst = dst;
   document.getElementById('alignRegisterBtn').disabled = !(src && dst);
 }
 
 function registerAlignPair() {
   const src = alignSel.src;
-  const dst = document.getElementById('alignPreviewTo').textContent.trim();
-  if (!src || !dst) return;
+  const dst = getEditableText(document.getElementById('alignPreviewTo'));
+  if (!src || !dst) {
+    showToast('韓国語と日本語の両方を選択してください', 'error');
+    return;
+  }
   if (dict.find(e => e.from === src)) {
     showToast('「' + src + '」はすでに登録されています', 'error'); return;
   }
