@@ -431,13 +431,16 @@
   .modal-overlay {
     display: none;
     position: fixed;
-    inset: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(58,46,42,0.35);
     z-index: 200;
     backdrop-filter: blur(6px);
     align-items: center;
     justify-content: center;
     padding: 20px;
+    /* iOSキーボード表示時にビューポートが縮まるのに追従させる */
+    height: 100%;
+    height: -webkit-fill-available;
   }
   .modal-overlay.open { display: flex; }
 
@@ -2245,9 +2248,15 @@ function openFreqModal() {
   renderFreqList();
   closePhrasesPanel();
   document.getElementById('freqModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
 }
 function closeFreqModal() {
   document.getElementById('freqModal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
   closePhrasesPanel();
 }
 
@@ -2440,9 +2449,17 @@ function openSearchModal() {
   document.getElementById('searchResultInfo').textContent = '';
   document.getElementById('searchResults').innerHTML = '<div class="search-empty">検索キーワードを入力してください</div>';
   document.getElementById('searchModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
   setTimeout(() => document.getElementById('searchInput').focus(), 100);
 }
-function closeSearchModal() { document.getElementById('searchModal').classList.remove('open'); }
+function closeSearchModal() {
+  document.getElementById('searchModal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
+}
 
 function runSearch() {
   const query = document.getElementById('searchInput').value.trim();
@@ -2539,8 +2556,18 @@ function openDictModal() {
   document.getElementById('dictTo').value   = '';
   switchDictTab(1);
   document.getElementById('dictModal').classList.add('open');
+
+  // iOSキーボード表示時にbodyがスクロールされるのを防ぐ
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
 }
-function closeDictModal() { document.getElementById('dictModal').classList.remove('open'); }
+function closeDictModal() {
+  document.getElementById('dictModal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
+}
 
 // タブ切替
 function switchDictTab(n) {
