@@ -2698,14 +2698,19 @@ function escHtml(str) {
 function runReplaceAll() {
   if (dict.length === 0) { showToast('置換ルールが登録されていません', 'error'); return; }
   let totalReplaced = 0;
+
+  // ハングル文字クラス（前後チェック用）
+  const HAN = '[\\uAC00-\\uD7A3\\u1100-\\u11FF\\u3130-\\u318F]';
+
   data.chapters.forEach(ch => {
     (ch.episodes || []).forEach(ep => {
       if (ep.completed) return;
       if (!ep.editorText) return;
       let text = ep.editorText;
-      // 辞書順（文字数降順）のまま上から適用
       dict.forEach(rule => {
-        const regex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+        const escaped = rule.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // 前後がハングル文字でない場合のみ一致（単語境界チェック）
+        const regex = new RegExp(`(?<!${HAN})${escaped}(?!${HAN})`, 'g');
         const before = text;
         text = text.replace(regex, rule.to);
         if (text !== before) totalReplaced++;
